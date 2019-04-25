@@ -25,6 +25,7 @@ namespace KopliSoft.Behaviour
         public List<GameObject> planF;
         public List<GameObject> planG;
         public List<GameObject> planH;
+        public GameObject waitingPoint;
 
         [SerializeField]
         protected string flowchartName;
@@ -102,6 +103,12 @@ namespace KopliSoft.Behaviour
         public void FollowPlanH()
         {
             FollowPlan(planH);
+        }
+
+        public void WaitAtPlace()
+        {
+            waitingPoint.transform.position = transform.position;
+            GoToWaypoint(waitingPoint);
         }
 
         public void GoToWaypoint(GameObject waypoint)
