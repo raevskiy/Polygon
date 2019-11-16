@@ -23,11 +23,7 @@ namespace KopliSoft.Interaction
         private void OnTriggerEnter(Collider other)
         {
             List<Item> items = null;
-            if ("Player".Equals(other.gameObject.tag))
-            {
-                items = GameObject.Find("/Inventories/GUI/Panel - Player Inventory").GetComponent<KopliSoft.Inventory.Inventory>().getItemList();
-            }
-            else if (other.GetComponentInChildren<StorageInventory>() != null)
+            if (other.GetComponentInChildren<StorageInventory>() != null)
             {
                 items = other.GetComponentInChildren<StorageInventory>().storageItems;
             }

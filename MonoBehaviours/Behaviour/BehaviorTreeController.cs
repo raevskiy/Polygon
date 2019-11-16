@@ -1,5 +1,6 @@
 ﻿using BehaviorDesigner.Runtime;
 using Opsive.DeathmatchAIKit.AI;
+using Opsive.ThirdPersonController.Wrappers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace KopliSoft.Behaviour
     {
     }
 
+    [RequireComponent(typeof(CharacterHealth))]
     public class BehaviorTreeController : MonoBehaviour
     {
         public static TrackEvent trackEvent = new TrackEvent();
@@ -36,6 +38,7 @@ namespace KopliSoft.Behaviour
         [SerializeField]
         private string characterName;
 
+        private CharacterHealth health;
         private BehaviorTree behaviorTree;
         private DeathmatchAgent deathmatchAgent;
         private NavMeshAgent navMeshAgent;
@@ -44,6 +47,7 @@ namespace KopliSoft.Behaviour
         
         void Start()
         {
+            health = GetComponent<CharacterHealth>();
             behaviorTree = GetComponent<BehaviorTree>();
             deathmatchAgent = GetComponent<DeathmatchAgent>();
             navMeshAgent = GetComponent<NavMeshAgent>();
@@ -109,6 +113,11 @@ namespace KopliSoft.Behaviour
         {
             waitingPoint.transform.position = transform.position;
             GoToWaypoint(waitingPoint);
+        }
+
+        public void CheckAlarm(GameObject alarmSource)
+        {
+            health.Damage(0, Vector3.zero, Vector3.zero, alarmSource);
         }
 
         public void GoToWaypoint(GameObject waypoint)

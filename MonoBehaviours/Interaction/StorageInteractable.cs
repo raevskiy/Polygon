@@ -26,12 +26,13 @@ namespace KopliSoft.Interaction
             if (other.transform.Equals(m_Interactor) && storageInventory != null && storageInventory.IsStorageOpened())
             {
                 storageInventory.CloseStorage();
+                m_Interactor.GetComponentInChildren<StorageInventory>().CloseStorage();
             }
         }
 
         public override bool CanInteract()
         {
-            return m_Interactor != null
+            return m_Interactor != null && m_Interactor.GetComponentInChildren<StorageInventory>() != null
                 && (pickpocketLevel == 0 || IsInCriminalMode());    //We can interact with storages in normal mode as well, only pickpockets require criminal mode
         }
 
@@ -54,7 +55,7 @@ namespace KopliSoft.Interaction
         {
             if (lockLevel > 0 && !IsInCriminalMode())
             {
-                Fungus.Flowchart flowchart = GameObject.Find("/Fungus/Flowcharts/Messages/lockpick_requires_criminal_mode").GetComponent<Fungus.Flowchart>();
+                Fungus.Flowchart flowchart = GameObject.Find("/Story/Flowcharts/Messages/lockpick_requires_criminal_mode").GetComponent<Fungus.Flowchart>();
                 flowchart.ExecuteBlock("Main");
                 return;
             }
@@ -64,10 +65,11 @@ namespace KopliSoft.Interaction
             {
                 lockLevel = 0;  //Now it is inlocked forever
                 storageInventory.ToggleStorage();
+                m_Interactor.GetComponentInChildren<StorageInventory>().ToggleStorage();
             }
             else
             {
-                Fungus.Flowchart flowchart = GameObject.Find("/Fungus/Flowcharts/Messages/lockpick_failed").GetComponent<Fungus.Flowchart>();
+                Fungus.Flowchart flowchart = GameObject.Find("/Story/Flowcharts/Messages/lockpick_failed").GetComponent<Fungus.Flowchart>();
                 flowchart.ExecuteBlock("Main");
             }
 
@@ -79,10 +81,11 @@ namespace KopliSoft.Interaction
             if (pickpocket >= pickpocketLevel)
             {
                 storageInventory.ToggleStorage();
+                m_Interactor.GetComponentInChildren<StorageInventory>().ToggleStorage();
             }
             else
             {
-                Fungus.Flowchart flowchart = GameObject.Find("/Fungus/Flowcharts/Messages/pickpocket_failed").GetComponent<Fungus.Flowchart>();
+                Fungus.Flowchart flowchart = GameObject.Find("/Story/Flowcharts/Messages/pickpocket_failed").GetComponent<Fungus.Flowchart>();
                 flowchart.ExecuteBlock("Main");
             }
         }

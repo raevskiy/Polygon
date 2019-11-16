@@ -52,9 +52,27 @@ namespace KopliSoft.Interaction
             }
         }
 
+        private void OnDestroy()
+        {
+            if (m_Interactor != null)
+            {
+                EventHandler.ExecuteEvent<IInteractable>(m_Interactor.gameObject, "OnInteractableHasInteractable", null);
+            }
+        }
+
         public int GetInteractableID()
         {
             return m_ID;
+        }
+
+        public void SetInteractableID(int id)
+        {
+            this.m_ID = id;
+        }
+
+        public void SetInteractorLayer(string[] layerNames)
+        {
+            m_InteractorLayer = LayerMask.GetMask(layerNames);
         }
 
         public bool RequiresTargetInteractorPosition()

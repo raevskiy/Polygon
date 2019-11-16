@@ -1,12 +1,14 @@
 ﻿using Fungus;
 using UnityEngine;
+using KopliSoft.Inventory;
 
 namespace KopliSoft.UI
 {
     public class UIController : MonoBehaviour
     {
         [SerializeField]
-        private GameObject hero;
+        private CharacterSwitch characterSwitch;
+
         private int guiCounter = 0;
         private bool inventoryOpened;
 
@@ -15,25 +17,17 @@ namespace KopliSoft.UI
             BlockSignals.OnBlockStart += OnBlockStart;
             BlockSignals.OnBlockEnd += OnBlockEnd;
             Inventory.Inventory.InventoryOpen += InventoryOpened;
-            Inventory.Inventory.AllInventoriesClosed += AllInventoriesClosed;
+            Inventory.Inventory.InventoryClose += InventoryClosed;
         }
 
         private void InventoryOpened()
         {
-            if (!inventoryOpened)
-            {
-                increaseGuiCounter();
-                inventoryOpened = true;
-            }
+            increaseGuiCounter();
         }
 
-        private void AllInventoriesClosed()
+        private void InventoryClosed(Inventory.Inventory inv)
         {
-            if (inventoryOpened)
-            {
-                decreaseGuiCounter();
-                inventoryOpened = false;
-            }
+            decreaseGuiCounter();
         }
 
         private void OnBlockStart(Block block)
@@ -59,7 +53,8 @@ namespace KopliSoft.UI
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-                Opsive.ThirdPersonController.EventHandler.ExecuteEvent(hero, "OnAllowGameplayInput", false);
+                Opsive.ThirdPersonController.EventHandler.ExecuteEvent(characterSwitch.getCurrentCharacter(), "OnAllowGameplayInput", false);
+                characterSwitch.SetLocked(true);
             }
         }
 
@@ -70,8 +65,9 @@ namespace KopliSoft.UI
             {
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
-                Opsive.ThirdPersonController.EventHandler.ExecuteEvent(hero, "OnAllowGameplayInput", true);
+                Opsive.ThirdPersonController.EventHandler.ExecuteEvent(characterSwitch.getCurrentCharacter(), "OnAllowGameplayInput", true);
                 Input.ResetInputAxes();
+                characterSwitch.SetLocked(false);
             }
         }
     }
