@@ -36,6 +36,11 @@ namespace KopliSoft.SceneControl
             StartCoroutine(SeamlessSceneDaemon(2));
         }
 
+        private void OnDestroy()
+        {
+            Fungus.BlockSignals.OnBlockEnd -= OnBlockEnd;
+        }
+
         public void FadeAndLoadScene(string[] sceneNamesToLoad, string[] sceneNamesToUnload)
         {
             if (!isFading)

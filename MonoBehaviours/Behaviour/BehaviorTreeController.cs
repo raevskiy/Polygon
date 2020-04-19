@@ -42,15 +42,18 @@ namespace KopliSoft.Behaviour
         private BehaviorTree behaviorTree;
         private DeathmatchAgent deathmatchAgent;
         private NavMeshAgent navMeshAgent;
+        private Opsive.ThirdPersonController.Wrappers.Inventory inventory;
+
         private bool trackedTargetFound;
         private int disableBehaviorCounter = 0;
         
         void Start()
         {
-            health = GetComponent<CharacterHealth>();
+            health = GetComponent(typeof(CharacterHealth)) as CharacterHealth;
             behaviorTree = GetComponent<BehaviorTree>();
             deathmatchAgent = GetComponent<DeathmatchAgent>();
             navMeshAgent = GetComponent<NavMeshAgent>();
+            inventory = GetComponent<Opsive.ThirdPersonController.Wrappers.Inventory>();
 
             if (flowchart == null && flowchartName != null && flowchartName.Trim().Length != 0)
             {
@@ -117,6 +120,11 @@ namespace KopliSoft.Behaviour
 
         public void CheckAlarm(GameObject alarmSource)
         {
+            if (planA != null && planA.Count > 0)
+            {
+                behaviorTree.SetVariableValue("Waypoints", planA);
+            }
+            
             health.Damage(0, Vector3.zero, Vector3.zero, alarmSource);
         }
 
@@ -199,6 +207,19 @@ namespace KopliSoft.Behaviour
         public void SendTrackTargetsInLayersEvent(string characterName, string layersCsv)
         {
             trackEvent.Invoke(characterName, layersCsv);
+        }
+
+        public void activateBombs()
+        {
+            foreach (DeathmatchAgent.WeaponStat stat in deathmatchAgent.AvailableWeapons) {
+                if (stat.ItemType.ID == 137999745)
+                {
+                    stat.SetEnabled(false);
+                } else if (stat.ItemType.ID == 209315222)
+                {
+                    stat.SetEnabled(true);
+                }
+            }
         }
 
     }

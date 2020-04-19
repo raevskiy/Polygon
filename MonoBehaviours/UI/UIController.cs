@@ -18,23 +18,35 @@ namespace KopliSoft.UI
             BlockSignals.OnBlockEnd += OnBlockEnd;
             Inventory.Inventory.InventoryOpen += InventoryOpened;
             Inventory.Inventory.InventoryClose += InventoryClosed;
+            ShowPanels.PanelOpenedEvent += IncreaseGuiCounter;
+            ShowPanels.PanelClosedEvent += DecreaseGuiCounter;
+        }
+
+        private void OnDestroy()
+        {
+            BlockSignals.OnBlockStart -= OnBlockStart;
+            BlockSignals.OnBlockEnd -= OnBlockEnd;
+            Inventory.Inventory.InventoryOpen -= InventoryOpened;
+            Inventory.Inventory.InventoryClose -= InventoryClosed;
+            ShowPanels.PanelOpenedEvent += IncreaseGuiCounter;
+            ShowPanels.PanelClosedEvent += DecreaseGuiCounter;
         }
 
         private void InventoryOpened()
         {
-            increaseGuiCounter();
+            IncreaseGuiCounter();
         }
 
         private void InventoryClosed(Inventory.Inventory inv)
         {
-            decreaseGuiCounter();
+            DecreaseGuiCounter();
         }
 
         private void OnBlockStart(Block block)
         {
             if (block.BlockName.Equals("Start"))
             {
-                increaseGuiCounter();
+                IncreaseGuiCounter();
             }
         }
 
@@ -42,11 +54,11 @@ namespace KopliSoft.UI
         {
             if (block.BlockName.Equals("End"))
             {
-                decreaseGuiCounter();
+                DecreaseGuiCounter();
             }
         }
 
-        private void increaseGuiCounter()
+        private void IncreaseGuiCounter()
         {
             guiCounter++;
             if (guiCounter == 1)
@@ -58,7 +70,7 @@ namespace KopliSoft.UI
             }
         }
 
-        private void decreaseGuiCounter()
+        private void DecreaseGuiCounter()
         {
             guiCounter--;
             if (guiCounter == 0)

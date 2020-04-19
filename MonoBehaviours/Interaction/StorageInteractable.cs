@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Opsive.ThirdPersonController;
+﻿using UnityEngine;
 using KopliSoft.Inventory;
 
 namespace KopliSoft.Interaction
@@ -33,7 +30,7 @@ namespace KopliSoft.Interaction
         public override bool CanInteract()
         {
             return m_Interactor != null && m_Interactor.GetComponentInChildren<StorageInventory>() != null
-                && (pickpocketLevel == 0 || IsInCriminalMode());    //We can interact with storages in normal mode as well, only pickpockets require criminal mode
+                && (pickpocketLevel == 0 && lockLevel == 0 || IsInCriminalMode());    //We can interact with storages in normal mode as well, only pickpockets require criminal mode
         }
 
         public override void Interact()
@@ -42,16 +39,20 @@ namespace KopliSoft.Interaction
             {
                 if (pickpocketLevel > 0)
                 {
-                    pickPocket();
+                    PickPocket();
+                }
+                else if (lockLevel > 0)
+                {
+                    OpenLocker();
                 }
                 else
                 {
-                    openLocker();
+                    OpenStorage();
                 }
             }
         }
 
-        private void openLocker()
+        private void OpenLocker()
         {
             if (lockLevel > 0 && !IsInCriminalMode())
             {
@@ -63,9 +64,8 @@ namespace KopliSoft.Interaction
             int lockpick = Random.Range(1, 9);
             if (lockpick >= lockLevel)
             {
-                lockLevel = 0;  //Now it is inlocked forever
-                storageInventory.ToggleStorage();
-                m_Interactor.GetComponentInChildren<StorageInventory>().ToggleStorage();
+                UnlockForever();
+                OpenStorage();
             }
             else
             {
@@ -75,19 +75,30 @@ namespace KopliSoft.Interaction
 
         }
 
-        private void pickPocket()
+        private void PickPocket()
         {
             int pickpocket = Random.Range(1, 9);
             if (pickpocket >= pickpocketLevel)
             {
-                storageInventory.ToggleStorage();
-                m_Interactor.GetComponentInChildren<StorageInventory>().ToggleStorage();
+                OpenStorage();
             }
             else
             {
                 Fungus.Flowchart flowchart = GameObject.Find("/Story/Flowcharts/Messages/pickpocket_failed").GetComponent<Fungus.Flowchart>();
                 flowchart.ExecuteBlock("Main");
             }
+        }
+
+        private void OpenStorage()
+        {
+            storageInventory.ToggleStorage();
+            m_Interactor.GetComponentInChildren<StorageInventory>().ToggleStorage();
+        }
+
+        public void UnlockForever()
+        {
+            lockLevel = 0;
+            pickpocketLevel = 0;
         }
     }
 }

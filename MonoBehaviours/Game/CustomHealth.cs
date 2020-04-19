@@ -1,5 +1,7 @@
-﻿using Opsive.DeathmatchAIKit;
-using Opsive.ThirdPersonController;
+﻿using KopliSoft.Interaction;
+using KopliSoft.Inventory;
+using Opsive.DeathmatchAIKit;
+using Opsive.ThirdPersonController.Wrappers;
 using UnityEngine;
 
 namespace KopliSoft.Game
@@ -36,9 +38,13 @@ namespace KopliSoft.Game
                 TeamManager.CancelBackupRequest(gameObject);
             }
 
-            if (OnCharacterDefeated != null) {
-                OnCharacterDefeated(this);
+            StorageInteractable storageIneractable = GetComponentInChildren<StorageInteractable>();
+            if (storageIneractable != null)
+            {
+                storageIneractable.UnlockForever();
             }
+
+            OnCharacterDefeated?.Invoke(this);
 
             base.Die(force, position, attacker);
         }
