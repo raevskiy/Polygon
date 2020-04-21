@@ -9,12 +9,15 @@ namespace KopliSoft.Interaction
         private int lockLevel = 0;
         [SerializeField]
         private int pickpocketLevel = 0;
-
+        [SerializeField]
         private StorageInventory storageInventory;
 
         void Start()
         {
-            storageInventory = GetComponent<StorageInventory>();
+            if (storageInventory == null)
+            {
+                storageInventory = GetComponent<StorageInventory>();
+            }
         }
 
         protected override void OnTriggerExit(Collider other)
