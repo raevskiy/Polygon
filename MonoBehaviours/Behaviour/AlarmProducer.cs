@@ -13,7 +13,7 @@ public class AlarmProducer : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, radius, layerMask.value);
         foreach (Collider collider in hitColliders)
         {
-            BehaviorTreeController controller = collider.GetComponent<BehaviorTreeController>();
+            PatrolController controller = collider.GetComponent<PatrolController>();
             if (controller != null)
             {
                 controller.CheckAlarm(gameObject);

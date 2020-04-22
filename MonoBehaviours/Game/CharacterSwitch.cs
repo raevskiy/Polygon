@@ -48,7 +48,7 @@ public class CharacterSwitch : MonoBehaviour
 
             switchControl(oldCharacter, true);
             switchControl(newCharacter, false);
-            oldCharacter.GetComponent<BehaviorTreeController>().WaitAtPlace();
+            oldCharacter.GetComponent<PatrolController>().WaitAtPlace();
             oldCharacter.GetComponentInChildren<KopliSoft.Inventory.StorageInventory>().inventory = npcInventory;
 
             cameraController.Character = newCharacter;

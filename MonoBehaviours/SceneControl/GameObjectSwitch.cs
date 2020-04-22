@@ -43,10 +43,10 @@ namespace KopliSoft.SceneControl
             for (int i = 0; i < charactersToTeleport.Length; i++)
             {
                 GameObject character = SceneGraphSearch.Find(charactersToTeleport[i]);
-                BehaviorTreeController behaviorTreeController = character.GetComponent<BehaviorTreeController>();
-                if (behaviorTreeController != null && behaviorTreeController.enabled)
+                PatrolController patrolController = character.GetComponent<PatrolController>();
+                if (patrolController != null && patrolController.enabled)
                 {
-                    behaviorTreeController.TeleportToWaypoint(teleports[i]);
+                    patrolController.TeleportToWaypoint(teleports[i]);
                 }
                 else
                 {

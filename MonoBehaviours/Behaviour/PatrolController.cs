@@ -15,7 +15,7 @@ namespace KopliSoft.Behaviour
     }
 
     [RequireComponent(typeof(CharacterHealth))]
-    public class BehaviorTreeController : MonoBehaviour
+    public class PatrolController : MonoBehaviour
     {
         public static TrackEvent trackEvent = new TrackEvent();
 
@@ -208,20 +208,6 @@ namespace KopliSoft.Behaviour
         {
             trackEvent.Invoke(characterName, layersCsv);
         }
-
-        public void activateBombs()
-        {
-            foreach (DeathmatchAgent.WeaponStat stat in deathmatchAgent.AvailableWeapons) {
-                if (stat.ItemType.ID == 137999745)
-                {
-                    stat.SetEnabled(false);
-                } else if (stat.ItemType.ID == 209315222)
-                {
-                    stat.SetEnabled(true);
-                }
-            }
-        }
-
     }
 }
 

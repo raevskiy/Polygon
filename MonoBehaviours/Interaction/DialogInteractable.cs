@@ -21,7 +21,7 @@ namespace KopliSoft.Interaction
         private bool canTalkIfDead;
 
         private bool inProgress;
-        private BehaviorTreeController behaviorTreeController;
+        private PatrolController patrolController;
         private CustomHealth health;
         private BehaviorTree behaviorTree;
         private NavMeshAgent navMeshAgent;
@@ -34,7 +34,7 @@ namespace KopliSoft.Interaction
                 flowchart = GameObject.Find(flowchartName).GetComponent<Fungus.Flowchart>();
             }
 
-            behaviorTreeController = GetComponentInParent<BehaviorTreeController>();
+            patrolController = GetComponentInParent<PatrolController>();
             health = GetComponentInParent<CustomHealth>();
             behaviorTree = GetComponentInParent<BehaviorTree>();
             navMeshAgent = GetComponentInParent<NavMeshAgent>();
@@ -46,10 +46,10 @@ namespace KopliSoft.Interaction
                 && m_Interactor != null
                 && flowchart != null
                 && !IsInCriminalMode()
-                && (canTalkIfDead || health == null || isAlive());
+                && (canTalkIfDead || health == null || IsAlive());
         }
 
-        private bool isAlive()
+        private bool IsAlive()
         {
             return health != null && health.CurrentHealth > 0;
         }
@@ -65,10 +65,10 @@ namespace KopliSoft.Interaction
             {
                 inProgress = true;
                 flowchart.ExecuteBlock("Start");
-                if (m_ShouldTurnToInerviewer && navMeshAgent != null && isAlive())
+                if (m_ShouldTurnToInerviewer && navMeshAgent != null && IsAlive())
                 {
                     destination = navMeshAgent.destination;
-                    DisableBehavior();
+                    DisableAI();
                     SetDestination(m_InteractorGameObject.transform.position);
                     StartCoroutine(CheckFacingInterviewer());
                 }
@@ -93,19 +93,19 @@ namespace KopliSoft.Interaction
                 Fungus.BlockSignals.OnBlockEnd -= OnBlockEnd;
                 inProgress = false;
                 EventHandler.ExecuteEvent(m_InteractorGameObject, "OnAnimatorInteractionComplete");
-                if (m_ShouldTurnToInerviewer && navMeshAgent != null && isAlive())
+                if (m_ShouldTurnToInerviewer && navMeshAgent != null && IsAlive())
                 {
-                    EnableBehavior();
+                    EnableAI();
                     SetDestination(destination);
                 }
             }
         }
 
-        private void EnableBehavior()
+        private void EnableAI()
         {
-            if (behaviorTreeController != null)
+            if (patrolController != null)
             {
-                behaviorTreeController.EnableBehavior();
+                patrolController.EnableBehavior();
             }
             else
             {
@@ -113,11 +113,11 @@ namespace KopliSoft.Interaction
             }
         }
 
-        private void DisableBehavior()
+        private void DisableAI()
         {
-            if (behaviorTreeController != null)
+            if (patrolController != null)
             {
-                behaviorTreeController.DisableBehavior();
+                patrolController.DisableBehavior();
             }
             else
             {
