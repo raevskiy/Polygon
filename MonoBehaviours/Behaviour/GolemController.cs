@@ -1,6 +1,4 @@
 ﻿using Opsive.DeathmatchAIKit.AI;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace KopliSoft.Behaviour
@@ -30,6 +28,12 @@ namespace KopliSoft.Behaviour
             }
         }
 
+        public void ActivateAntiRiotPunchedCard()
+        {
+            string[] layers = new string[] {"Player", "RedTeam", "BlueTeam", "GreenTeam", "YellowTeam"};
+            int mask = LayerMask.GetMask(layers) ^ (1 << gameObject.layer);
+            deathmatchAgent.TargetLayerMask = mask;
+        }
     }
 
 }
