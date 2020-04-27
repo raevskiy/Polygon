@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace KopliSoft.SceneControl
 {
-    public class GameObjectSwitch : MonoBehaviour
+    public class ChangeOfScenery : MonoBehaviour
     {
         [SerializeField]
         private string[] objectsToDeactivate;
