@@ -187,7 +187,7 @@ namespace KopliSoft.Behaviour
 
         public void TrackPlayer()
         {
-            deathmatchAgent.TargetLayerMask = LayerMask.GetMask("Player");
+            deathmatchAgent.TargetLayerMask |= LayerMask.GetMask("Player");
         }
 
         public void TrackTargetsInLayers(string layersCsv)

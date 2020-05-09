@@ -23,7 +23,7 @@ namespace Opsive.ThirdPersonController
                 Destroy(GameObject.Find("Menu UI"));
                 SceneManager.LoadSceneAsync("Title", LoadSceneMode.Single);
             }
-            else
+            else if (characterSwitch.GetCurrentCharacter() == gameObject)
             {
                 characterSwitch.Switch();
             }

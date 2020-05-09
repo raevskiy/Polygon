@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using KopliSoft.Inventory;
+using KopliSoft.Behaviour;
 
 namespace KopliSoft.Interaction
 {
@@ -33,7 +34,7 @@ namespace KopliSoft.Interaction
         public override bool CanInteract()
         {
             return m_Interactor != null && m_Interactor.GetComponentInChildren<StorageInventory>() != null
-                && (pickpocketLevel == 0 && lockLevel == 0 || IsInCriminalMode());    //We can interact with storages in normal mode as well, only pickpockets require criminal mode
+                && (pickpocketLevel == 0 && lockLevel == 0 || IsInCriminalMode());
         }
 
         public override void Interact()
@@ -87,9 +88,22 @@ namespace KopliSoft.Interaction
             }
             else
             {
-                Fungus.Flowchart flowchart = GameObject.Find("/Story/Flowcharts/Messages/pickpocket_failed").GetComponent<Fungus.Flowchart>();
-                flowchart.ExecuteBlock("Main");
+                ShowPickPocketFailedMessage();
+                AttackThief();
             }
+        }
+
+        private void ShowPickPocketFailedMessage()
+        {
+            Fungus.Flowchart flowchart = GameObject.Find("/Story/Flowcharts/Messages/pickpocket_failed").GetComponent<Fungus.Flowchart>();
+            flowchart.ExecuteBlock("Main");
+        }
+
+        private void AttackThief()
+        {
+            PatrolController patrolController = GetComponentInParent<PatrolController>();
+            patrolController.TrackPlayer();
+            patrolController.CheckAlarm(m_InteractorGameObject);
         }
 
         private void OpenStorage()
