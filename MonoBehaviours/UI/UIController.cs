@@ -65,7 +65,7 @@ namespace KopliSoft.UI
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-                Opsive.ThirdPersonController.EventHandler.ExecuteEvent(characterSwitch.getCurrentCharacter(), "OnAllowGameplayInput", false);
+                Opsive.ThirdPersonController.EventHandler.ExecuteEvent(characterSwitch.GetCurrentCharacter(), "OnAllowGameplayInput", false);
                 characterSwitch.SetLocked(true);
             }
         }
@@ -77,7 +77,7 @@ namespace KopliSoft.UI
             {
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
-                Opsive.ThirdPersonController.EventHandler.ExecuteEvent(characterSwitch.getCurrentCharacter(), "OnAllowGameplayInput", true);
+                Opsive.ThirdPersonController.EventHandler.ExecuteEvent(characterSwitch.GetCurrentCharacter(), "OnAllowGameplayInput", true);
                 Input.ResetInputAxes();
                 characterSwitch.SetLocked(false);
             }

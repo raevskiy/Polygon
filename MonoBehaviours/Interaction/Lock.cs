@@ -34,7 +34,7 @@ namespace KopliSoft.Interaction
                 {
                     if (item.itemID == keyID)
                     {
-                        setLocksEnabled(false);
+                        SetLocksEnabled(false);
                         keyHolder = other;
                         return;
                     }
@@ -57,10 +57,10 @@ namespace KopliSoft.Interaction
             {
                 yield return new WaitForSeconds(.1f);
             }
-            setLocksEnabled(true);
+            SetLocksEnabled(true);
         }
 
-        private void setLocksEnabled(bool enabled)
+        private void SetLocksEnabled(bool enabled)
         {
             foreach (BoxCollider lockCollider in lockColliders)
             {

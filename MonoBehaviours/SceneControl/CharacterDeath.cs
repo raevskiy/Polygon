@@ -5,33 +5,28 @@ using UnityEngine.SceneManagement;
 
 namespace Opsive.ThirdPersonController
 {
-    /// <summary>
-    /// When the character respawns it should respawn in the location determined by SpawnSelection.
-    /// </summary>
     public class CharacterDeath : Respawner
     {
-        // Component references
-        private RigidbodyCharacterController m_Controller;
+        [SerializeField]
+        private bool missionCriticalCharacter;
+        private CharacterSwitch characterSwitch;
 
-        /// <summary>
-        /// Cache the component references.
-        /// </summary>
-        protected override void Awake()
+        void Start()
         {
-            base.Awake();
-
-            m_Controller = GetComponent<RigidbodyCharacterController>();
+            characterSwitch = FindObjectOfType<CharacterSwitch>();
         }
 
-        /// <summary>
-        /// The character should spawn. Override Spawn to allow the SpawnSelection component determine the location that the character should spawn.
-        /// Call the corresponding server or client method.
-        /// </summary>
         public override void Spawn()
         {
-            Destroy(GameObject.Find("Menu UI"));
-            SceneManager.LoadSceneAsync("Title", LoadSceneMode.Single);
+            if (missionCriticalCharacter)
+            {
+                Destroy(GameObject.Find("Menu UI"));
+                SceneManager.LoadSceneAsync("Title", LoadSceneMode.Single);
+            }
+            else
+            {
+                characterSwitch.Switch();
+            }
         }
-
     }
 }

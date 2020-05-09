@@ -24,21 +24,21 @@ namespace KopliSoft.SceneControl
 
         private IEnumerator Start()
         {
-            Fungus.BlockSignals.OnBlockEnd += OnBlockEnd;
+            BlockSignals.OnBlockEnd += OnBlockEnd;
 
             Application.backgroundLoadingPriority = ThreadPriority.Low;
             faderCanvasGroup.alpha = 1f;
             yield return StartCoroutine(LoadScenes(new string[] { startingSceneName }));
             if (!ShowChapterInfo(startingSceneName))
             {
-                StartCoroutine(Fade(0f));
+                StartCoroutine(Fade(0f, this.fadeDuration));
             }
             StartCoroutine(SeamlessSceneDaemon(2));
         }
 
         private void OnDestroy()
         {
-            Fungus.BlockSignals.OnBlockEnd -= OnBlockEnd;
+            BlockSignals.OnBlockEnd -= OnBlockEnd;
         }
 
         public void FadeAndLoadScene(string[] sceneNamesToLoad, string[] sceneNamesToUnload)
@@ -51,24 +51,18 @@ namespace KopliSoft.SceneControl
 
         private IEnumerator FadeAndSwitchScenes(string[] sceneNamesToLoad, string[] sceneNamesToUnload)
         {
-            yield return StartCoroutine(Fade(1f));
+            yield return StartCoroutine(Fade(1f, this.fadeDuration));
 
-            if (BeforeSceneUnload != null)
-            {
-                BeforeSceneUnload();
-            }
+            BeforeSceneUnload?.Invoke();
 
             yield return StartCoroutine(UnloadScenes(sceneNamesToUnload));
             yield return StartCoroutine(LoadScenes(sceneNamesToLoad));
 
-            if (AfterSceneLoad != null)
-            {
-                AfterSceneLoad();
-            }
+            AfterSceneLoad?.Invoke();
 
             if (!ShowChapterInfo(sceneNamesToLoad))
             {
-                StartCoroutine(Fade(0f));
+                StartCoroutine(Fade(0f, this.fadeDuration));
             }
         }
 
@@ -96,11 +90,11 @@ namespace KopliSoft.SceneControl
             return hasBlock;
         }
 
-        void OnBlockEnd(Fungus.Block block)
+        void OnBlockEnd(Block block)
         {
             if (block.BlockName.Equals(currentChapter))
             {
-                StartCoroutine(Fade(0f));
+                StartCoroutine(Fade(0f, this.fadeDuration));
                 GameObject chapter = GameObject.Find("/Story/" + currentChapter);
                 if (chapter != null)
                 {
@@ -125,25 +119,32 @@ namespace KopliSoft.SceneControl
             }
         }
 
-        public IEnumerator Fade(float finalAlpha)
+        public IEnumerator Fade(float finalAlpha, float fadeDuration)
         {
-            // FadeAndSwitchScenes coroutine won't be called again.
-            isFading = true;
-            // no more input can be accepted.
-            faderCanvasGroup.blocksRaycasts = true;
-            float fadeSpeed = Mathf.Abs(faderCanvasGroup.alpha - finalAlpha) / fadeDuration;
-            while (!Mathf.Approximately(faderCanvasGroup.alpha, finalAlpha))
+            if (fadeDuration < 0.1)
             {
-                faderCanvasGroup.alpha = Mathf.MoveTowards(
-                    faderCanvasGroup.alpha,
-                    finalAlpha,
-                    fadeSpeed * Time.deltaTime);
-                yield return null;
+                faderCanvasGroup.alpha = finalAlpha;
             }
+            else
+            {
+                // FadeAndSwitchScenes coroutine won't be called again.
+                isFading = true;
+                // no more input can be accepted.
+                faderCanvasGroup.blocksRaycasts = true;
+                float fadeSpeed = Mathf.Abs(faderCanvasGroup.alpha - finalAlpha) / fadeDuration;
+                while (!Mathf.Approximately(faderCanvasGroup.alpha, finalAlpha))
+                {
+                    faderCanvasGroup.alpha = Mathf.MoveTowards(
+                        faderCanvasGroup.alpha,
+                        finalAlpha,
+                        fadeSpeed * Time.deltaTime);
+                    yield return null;
+                }
 
-            isFading = false;
-            // input is no longer ignored.
-            faderCanvasGroup.blocksRaycasts = false;
+                isFading = false;
+                // input is no longer ignored.
+                faderCanvasGroup.blocksRaycasts = false;
+            }
         }
 
         public void AddSeamlessScene(string sceneName)
