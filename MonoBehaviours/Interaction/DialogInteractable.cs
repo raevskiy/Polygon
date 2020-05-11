@@ -5,6 +5,7 @@ using BehaviorDesigner.Runtime;
 using UnityEngine.AI;
 using KopliSoft.Behaviour;
 using KopliSoft.Game;
+using Opsive.DeathmatchAIKit.AI;
 
 namespace KopliSoft.Interaction
 {
@@ -25,6 +26,7 @@ namespace KopliSoft.Interaction
         private CustomHealth health;
         private BehaviorTree behaviorTree;
         private NavMeshAgent navMeshAgent;
+        private DeathmatchAgent deathmatchAgent;
         private Vector3 destination;
 
         void Start()
@@ -38,6 +40,7 @@ namespace KopliSoft.Interaction
             health = GetComponentInParent<CustomHealth>();
             behaviorTree = GetComponentInParent<BehaviorTree>();
             navMeshAgent = GetComponentInParent<NavMeshAgent>();
+            deathmatchAgent = GetComponentInParent<DeathmatchAgent>();
         }
 
         public override bool CanInteract()
@@ -96,7 +99,14 @@ namespace KopliSoft.Interaction
                 if (m_ShouldTurnToInerviewer && navMeshAgent != null && IsAlive())
                 {
                     EnableAI();
-                    SetDestination(destination);
+                    if ((deathmatchAgent.TargetLayerMask & LayerMask.GetMask("Player")) != 0)
+                    {
+                        navMeshAgent.isStopped = false;
+                        //patrolController.CheckAlarm(m_InteractorGameObject);
+                    } else
+                    {
+                        SetDestination(destination);
+                    }
                 }
             }
         }
