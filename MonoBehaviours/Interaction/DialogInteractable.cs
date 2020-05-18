@@ -13,9 +13,9 @@ namespace KopliSoft.Interaction
     {
         [Tooltip("Should this person turn to the interviewer?")]
         [SerializeField]
-        protected bool m_ShouldTurnToInerviewer = true;
+        private bool m_ShouldTurnToInerviewer = true;
         [SerializeField]
-        protected string flowchartName;
+        private string flowchartName;
         [SerializeField]
         private Fungus.Flowchart flowchart;
         [SerializeField]
@@ -102,7 +102,6 @@ namespace KopliSoft.Interaction
                     if ((deathmatchAgent.TargetLayerMask & LayerMask.GetMask("Player")) != 0)
                     {
                         navMeshAgent.isStopped = false;
-                        //patrolController.CheckAlarm(m_InteractorGameObject);
                     } else
                     {
                         SetDestination(destination);

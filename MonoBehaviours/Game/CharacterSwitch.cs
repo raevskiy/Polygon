@@ -38,7 +38,6 @@ public class CharacterSwitch : MonoBehaviour
     public void Switch()
     {
         GameObject oldCharacter = characters[currentCharacter];
-
         cameraController.ChangeState(cameraStates[currentCharacter], false);
 
         GameObject newCharacter = null;
@@ -48,13 +47,7 @@ public class CharacterSwitch : MonoBehaviour
             newCharacter = characters[currentCharacter];
         } while (!newCharacter.activeInHierarchy || IsDead(newCharacter));
 
-        if (!IsDead(oldCharacter))
-        {
-            SwitchControlToAi(oldCharacter, true);
-            oldCharacter.GetComponent<PatrolController>().WaitAtPlace();
-        }
-        SwitchControlToAi(newCharacter, false);
-
+        SwitchControl(oldCharacter, newCharacter);
         oldCharacter.GetComponentInChildren<KopliSoft.Inventory.StorageInventory>().inventory = npcInventory;
         newCharacter.GetComponentInChildren<KopliSoft.Inventory.StorageInventory>().inventory = playerInventory;
 
@@ -75,6 +68,20 @@ public class CharacterSwitch : MonoBehaviour
         }
     }
 
+    private void SwitchControl(GameObject oldCharacter, GameObject newCharacter)
+    {
+        if (IsDead(oldCharacter))
+        {
+            DeactivateUserInput(oldCharacter);
+        }
+        else
+        {
+            SwitchControlToAi(oldCharacter, true);
+            oldCharacter.GetComponent<PatrolController>().WaitAtPlace();
+        }
+        SwitchControlToAi(newCharacter, false);
+    }
+
     private void SwitchControlToAi(GameObject character, bool aiControl)
     {
         character.GetComponent<ControllerHandler>().enabled = !aiControl;
@@ -85,6 +92,13 @@ public class CharacterSwitch : MonoBehaviour
         character.GetComponent<NavMeshAgent>().enabled = aiControl;
         character.GetComponent<BehaviorTree>().enabled = aiControl;
         character.GetComponent<DeathmatchAgent>().enabled = aiControl;
+    }
+
+    private void DeactivateUserInput(GameObject character)
+    {
+        character.GetComponent<ControllerHandler>().enabled = false;
+        character.GetComponent<ItemHandler>().enabled = false;
+        character.GetComponent<UnityInput>().enabled = false;
     }
 
     private void SwitchCamera(GameObject newCharacter)

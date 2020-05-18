@@ -8,6 +8,8 @@ namespace KopliSoft.UI
     {
         [SerializeField]
         private CharacterSwitch characterSwitch;
+        [SerializeField]
+        private InventoryController inventoryConroller;
 
         private int guiCounter = 0;
         private bool inventoryOpened;
@@ -47,6 +49,7 @@ namespace KopliSoft.UI
             if (block.BlockName.Equals("Start"))
             {
                 IncreaseGuiCounter();
+                inventoryConroller.BlockInventoryUI();
             }
         }
 
@@ -55,6 +58,7 @@ namespace KopliSoft.UI
             if (block.BlockName.Equals("End"))
             {
                 DecreaseGuiCounter();
+                inventoryConroller.UnblockInventoryUI();
             }
         }
 
