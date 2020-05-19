@@ -38,20 +38,36 @@ public class CharacterSwitch : MonoBehaviour
     public void Switch()
     {
         GameObject oldCharacter = characters[currentCharacter];
-        cameraController.ChangeState(cameraStates[currentCharacter], false);
+        string oldState = cameraStates[currentCharacter];
 
-        GameObject newCharacter = null;
-        do
+        GameObject newCharacter = FindNewCharacter(oldCharacter);
+        if (newCharacter == null)
         {
-            NextCharacter();
-            newCharacter = characters[currentCharacter];
-        } while (!newCharacter.activeInHierarchy || IsDead(newCharacter));
+            return;
+        }
 
+        cameraController.ChangeState(oldState, false);
         SwitchControl(oldCharacter, newCharacter);
         oldCharacter.GetComponentInChildren<KopliSoft.Inventory.StorageInventory>().inventory = npcInventory;
         newCharacter.GetComponentInChildren<KopliSoft.Inventory.StorageInventory>().inventory = playerInventory;
 
         SwitchCamera(newCharacter);
+    }
+
+    private GameObject FindNewCharacter(GameObject oldCharacter)
+    {
+        GameObject newCharacter = null;
+        do
+        {
+            NextCharacter();
+            newCharacter = characters[currentCharacter];
+            if (newCharacter == oldCharacter)
+            {
+                return null;
+            }
+        } while (!newCharacter.activeInHierarchy || IsDead(newCharacter));
+
+        return newCharacter;
     }
 
     private bool IsDead(GameObject character)
