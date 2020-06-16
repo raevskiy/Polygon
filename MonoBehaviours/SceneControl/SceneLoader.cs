@@ -1,14 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace KopliSoft.SceneControl
 {
-    public class SeamlessSceneLoader : MonoBehaviour
+    public class SceneLoader : MonoBehaviour
     {
         public string sceneName;
         private SceneController sceneController;
+        private bool loaded;
 
         private void Start()
         {
@@ -17,20 +17,17 @@ namespace KopliSoft.SceneControl
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.CompareTag("MainCamera"))
+            if (!loaded && other.CompareTag("MainCamera"))
             {
-                Load();
+                LoadOnce();
             }
         }
 
-        public void Load()
+        public void LoadOnce()
         {
             sceneController.AddSeamlessScene(sceneName);
-        }
-
-        public void Unload()
-        {
-            sceneController.RemoveSeamlessScene(sceneName);
+            loaded = true;
         }
     }
+
 }

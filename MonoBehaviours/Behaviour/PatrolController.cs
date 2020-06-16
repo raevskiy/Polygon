@@ -46,7 +46,7 @@ namespace KopliSoft.Behaviour
 
         private bool trackedTargetFound;
         private int disableBehaviorCounter = 0;
-        
+
         void Start()
         {
             health = GetComponent(typeof(CharacterHealth)) as CharacterHealth;

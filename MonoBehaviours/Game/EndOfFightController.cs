@@ -13,6 +13,8 @@ namespace KopliSoft.Game
         private Flowchart flowchart;
         [SerializeField]
         private string blockName = "Main";
+        [SerializeField]
+        private int allowedSurvivors = 0;
 
         void Start()
         {
@@ -26,8 +28,9 @@ namespace KopliSoft.Game
                 charactersToBeDefeated.Remove(customHealth);
             }
 
-            if (charactersToBeDefeated.Count == 0)
+            if (charactersToBeDefeated.Count == allowedSurvivors)
             {
+                CustomHealth.OnCharacterDefeated -= OnCharacterDefeated;
                 flowchart.ExecuteBlock(blockName);
             }
         }

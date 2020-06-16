@@ -4,6 +4,7 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 using Fungus;
 using System.Collections.Generic;
+using KopliSoft.Behaviour;
 
 namespace KopliSoft.SceneControl
 {
@@ -15,9 +16,17 @@ namespace KopliSoft.SceneControl
         public CanvasGroup faderCanvasGroup;            // The CanvasGroup that controls the Image used for fading to black.
         public float fadeDuration = 1f;                 // How long it should take to fade to and from black.
         private bool isFading;
+
         public string startingSceneName = "MainScene";
         public Flowchart chapterInfo;
         private string currentChapter;
+
+        [SerializeField]
+        private PatrolController[] mainCharacters;
+        [SerializeField]
+        private GameObject vault;
+        [SerializeField]
+        private GameObject[] hiddenInDebriefing;
 
         private enum SceneState {NONE, TO_LOAD, TO_UNLOAD, LOADING, UNLOADING, LOADED};
         private Dictionary<string, SceneState> seamleassScenes = new Dictionary<string, SceneState>();
@@ -41,19 +50,32 @@ namespace KopliSoft.SceneControl
             BlockSignals.OnBlockEnd -= OnBlockEnd;
         }
 
-        public void FadeAndLoadScene(string[] sceneNamesToLoad, string[] sceneNamesToUnload)
+        public void FadeAndSwitchScenes(string sceneNamesToLoad, string sceneNamesToUnload)
+        {
+            FadeAndSwitchScenes(sceneNamesToLoad.Split(','), sceneNamesToUnload.Split(','));
+        }
+
+        public void FadeAndSwitchScenes(string[] sceneNamesToLoad, string[] sceneNamesToUnload)
         {
             if (!isFading)
             {
-                StartCoroutine(FadeAndSwitchScenes(sceneNamesToLoad, sceneNamesToUnload));
+                StartCoroutine(DoFadeAndSwitchScenes(sceneNamesToLoad, sceneNamesToUnload));
             }
         }
 
-        private IEnumerator FadeAndSwitchScenes(string[] sceneNamesToLoad, string[] sceneNamesToUnload)
+        private IEnumerator DoFadeAndSwitchScenes(string[] sceneNamesToLoad, string[] sceneNamesToUnload)
         {
             yield return StartCoroutine(Fade(1f, this.fadeDuration));
 
             BeforeSceneUnload?.Invoke();
+            if (IsDebriefing(sceneNamesToLoad))
+            {
+                MoveCharactersToVault();
+                foreach (GameObject gameObject in hiddenInDebriefing)
+                {
+                    gameObject.SetActive(false);
+                }
+            }
 
             yield return StartCoroutine(UnloadScenes(sceneNamesToUnload));
             yield return StartCoroutine(LoadScenes(sceneNamesToLoad));
@@ -63,6 +85,34 @@ namespace KopliSoft.SceneControl
             if (!ShowChapterInfo(sceneNamesToLoad))
             {
                 StartCoroutine(Fade(0f, this.fadeDuration));
+            }
+        }
+
+        private bool IsDebriefing(string[] sceneNamesToLoad)
+        {
+            foreach (string sceneName in sceneNamesToLoad)
+            {
+                if (sceneName.ToLower().Contains("debriefing"))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void MoveCharactersToVault()
+        {
+            foreach (PatrolController character in mainCharacters)
+            {
+                if (character.gameObject.activeInHierarchy)
+                {
+                    character.TeleportToWaypoint(vault);
+                }
+                else
+                {
+                    character.transform.position = vault.transform.position;
+                    character.transform.rotation = vault.transform.rotation;
+                }
             }
         }
 

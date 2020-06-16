@@ -15,6 +15,11 @@ namespace KopliSoft.SceneControl
         private float pauseDuration = 0;
 
         [SerializeField]
+        private string sceneToLoad;
+        [SerializeField]
+        private string sceneToUnload;
+
+        [SerializeField]
         private string[] objectsToDeactivate;
         [SerializeField]
         private string[] objectsToActivate;
@@ -43,7 +48,7 @@ namespace KopliSoft.SceneControl
 
         public void Switch()
         {
-            if (fadeInDuration <  0.1f)
+            if (fadeInDuration >=0 && fadeInDuration <  0.1f)
             {
                 sceneController.faderCanvasGroup.alpha = 1.0f;
             }
@@ -63,7 +68,10 @@ namespace KopliSoft.SceneControl
                 yield return StartCoroutine(Pause());
             }
 
-            StartCoroutine(sceneController.Fade(0f, fadeOutDuration));
+            if (fadeOutDuration >= 0)
+            {
+                StartCoroutine(sceneController.Fade(0f, fadeOutDuration));
+            }
         }
 
         private void ChangeScenery()
@@ -80,6 +88,11 @@ namespace KopliSoft.SceneControl
 
         private void Deactivate()
         {
+            if (sceneToUnload != null)
+            {
+                sceneController.RemoveSeamlessScene(sceneToUnload);
+            }
+
             foreach (string objectName in objectsToDeactivate)
             {
                 GameObject gameObject = SceneGraphSearch.Find(objectName);
@@ -98,6 +111,11 @@ namespace KopliSoft.SceneControl
 
         private void Activate()
         {
+            if (sceneToLoad != null)
+            {
+                sceneController.AddSeamlessScene(sceneToLoad);
+            }
+
             foreach (string objectName in objectsToActivate)
             {
                 GameObject gameObject = SceneGraphSearch.Find(objectName);

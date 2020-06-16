@@ -11,7 +11,7 @@ namespace KopliSoft.SceneControl
 
         private void OnTriggerExit(Collider other)
         {
-            if ("MainCamera".Equals(other.tag))
+            if (other.CompareTag("MainCamera"))
             {
                 loader.Unload();
             }
