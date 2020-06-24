@@ -15,15 +15,34 @@ namespace KopliSoft.Behaviour
 
         public void ActivateBombs()
         {
+            SetWeaponStatEnabled(209315222, true);
+        }
+
+        public void DeactivateBombs()
+        {
+            SetWeaponStatEnabled(209315222, false);
+        }
+
+        public void ActivateCircularSaw()
+        {
+            SetWeaponStatEnabled(137999745, true);
+            SetWeaponStatEnabled(1783797938, true);
+        }
+
+        public void DeactivateCircularSaw()
+        {
+            SetWeaponStatEnabled(137999745, false);
+            SetWeaponStatEnabled(1783797938, false);
+        }
+
+        private void SetWeaponStatEnabled(int id, bool enabled)
+        {
             foreach (DeathmatchAgent.WeaponStat stat in deathmatchAgent.AvailableWeapons)
             {
-                if (stat.ItemType.ID == 137999745)
+                if (stat.ItemType.ID == id)
                 {
-                    stat.SetEnabled(false);
-                }
-                else if (stat.ItemType.ID == 209315222)
-                {
-                    stat.SetEnabled(true);
+                    stat.SetEnabled(enabled);
+                    return;
                 }
             }
         }
@@ -34,6 +53,14 @@ namespace KopliSoft.Behaviour
             int mask = LayerMask.GetMask(layers) ^ (1 << gameObject.layer);
             deathmatchAgent.TargetLayerMask = mask;
         }
+
+        public void DeactivateAntiRiotPunchedCard()
+        {
+            string[] layers = new string[] { "Player" };
+            int mask = LayerMask.GetMask(layers);
+            deathmatchAgent.TargetLayerMask = mask;
+        }
+
     }
 
 }

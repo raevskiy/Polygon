@@ -67,6 +67,10 @@ namespace KopliSoft.Interaction
             if (m_Interactor != null && flowchart != null)
             {
                 inProgress = true;
+                if (flowchart.HasVariable("Interviewer"))
+                {
+                    flowchart.SetStringVariable("Interviewer", m_InteractorGameObject.tag);
+                }
                 flowchart.ExecuteBlock("Start");
                 if (m_ShouldTurnToInerviewer && navMeshAgent != null && IsAlive())
                 {

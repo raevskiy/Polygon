@@ -1,5 +1,6 @@
 ﻿using BehaviorDesigner.Runtime;
 using Opsive.DeathmatchAIKit.AI;
+using Opsive.ThirdPersonController.Abilities;
 using Opsive.ThirdPersonController.Wrappers;
 using System.Collections;
 using System.Collections.Generic;
@@ -43,6 +44,8 @@ namespace KopliSoft.Behaviour
         private DeathmatchAgent deathmatchAgent;
         private NavMeshAgent navMeshAgent;
         private Opsive.ThirdPersonController.Wrappers.Inventory inventory;
+        private RigidbodyCharacterController characterController;
+        private SpeedChange speedChange;
 
         private bool trackedTargetFound;
         private int disableBehaviorCounter = 0;
@@ -53,6 +56,8 @@ namespace KopliSoft.Behaviour
             behaviorTree = GetComponent<BehaviorTree>();
             deathmatchAgent = GetComponent<DeathmatchAgent>();
             navMeshAgent = GetComponent<NavMeshAgent>();
+            characterController = GetComponent<RigidbodyCharacterController>();
+            speedChange = GetComponent<SpeedChange>();
             inventory = GetComponent<Opsive.ThirdPersonController.Wrappers.Inventory>();
 
             if (flowchart == null && flowchartName != null && flowchartName.Trim().Length != 0)
@@ -90,6 +95,7 @@ namespace KopliSoft.Behaviour
         public void FollowPlanD()
         {
             FollowPlan(planD);
+            Run();
         }
 
         public void FollowPlanE()
@@ -207,6 +213,16 @@ namespace KopliSoft.Behaviour
         public void SendTrackTargetsInLayersEvent(string characterName, string layersCsv)
         {
             trackEvent.Invoke(characterName, layersCsv);
+        }
+
+        public void Run()
+        {
+            characterController.TryStartAbility(speedChange);
+        }
+
+        public void Walk()
+        {
+            characterController.TryStopAbility(speedChange);
         }
     }
 }
