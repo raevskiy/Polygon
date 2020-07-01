@@ -12,20 +12,38 @@ namespace KopliSoft.Interaction
         [SerializeField]
         private Transform door;
 
+        private float breakForce;
         private BoxCollider[] lockColliders;
         private Collider keyHolder;
 
         void Start()
         {
             lockColliders = transform.GetComponentsInChildren<BoxCollider>();
+            breakForce = door.GetComponent<HingeJoint>().breakForce;
         }
 
         private void OnTriggerEnter(Collider other)
         {
-            List<Item> items = null;
-            if (other.GetComponentInChildren<StorageInventory>() != null)
+            if (IsKeyHolderNearby(other))
             {
-                items = other.GetComponentInChildren<StorageInventory>().storageItems;
+                SetBreakForce(Mathf.Infinity);
+                SetLocksEnabled(false);
+                keyHolder = other;
+            }
+        }
+
+        private bool IsCharacter(Collider collider)
+        {
+            LayerMask layermask = LayerMask.GetMask(new string[] { "Player" });
+            return layermask == (layermask | (1 << collider.gameObject.layer));
+        }
+
+        private bool IsKeyHolderNearby(Collider collider)
+        {
+            List<Item> items = null;
+            if (collider.GetComponentInChildren<StorageInventory>() != null)
+            {
+                items = collider.GetComponentInChildren<StorageInventory>().storageItems;
             }
 
             if (items != null)
@@ -34,29 +52,29 @@ namespace KopliSoft.Interaction
                 {
                     if (item.itemID == keyID)
                     {
-                        SetLocksEnabled(false);
-                        keyHolder = other;
-                        return;
+                        return true;
                     }
                 }
             }
+            return false;
         }
 
         private void OnTriggerExit(Collider other)
         {
             if (other == keyHolder)
             {
-                StartCoroutine(CheckDoorZeroRotation());
+                StartCoroutine(LockDoorWhenItIsClosed());
                 keyHolder = null;
             }
         }
 
-        IEnumerator CheckDoorZeroRotation()
+        IEnumerator LockDoorWhenItIsClosed()
         {
             while (Vector3.Dot(door.transform.right, transform.right) < 0.998f)
             {
                 yield return new WaitForSeconds(.1f);
             }
+            SetBreakForce(breakForce);
             SetLocksEnabled(true);
         }
 
@@ -67,6 +85,14 @@ namespace KopliSoft.Interaction
                 lockCollider.enabled = enabled;
             }
         }
-    }
 
+        private void SetBreakForce(float breakForce)
+        {
+            HingeJoint joint = door.GetComponent<HingeJoint>();
+            if (joint != null)
+            {
+                joint.breakForce = breakForce;
+            }
+        }
+    }
 }
