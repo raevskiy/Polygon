@@ -1,6 +1,7 @@
-﻿using KopliSoft.Interaction;
-using KopliSoft.Inventory;
+﻿using KopliSoft.Behaviour;
+using KopliSoft.Interaction;
 using Opsive.DeathmatchAIKit;
+using Opsive.DeathmatchAIKit.AI;
 using Opsive.ThirdPersonController.Wrappers;
 using UnityEngine;
 
@@ -10,6 +11,13 @@ namespace KopliSoft.Game
     {
         public static event CharacterDefeatedHandler OnCharacterDefeated;
         public delegate void CharacterDefeatedHandler(CustomHealth character);
+
+        private DeathmatchAgent deathmatchAgent;
+
+        private void Start()
+        {
+            deathmatchAgent = GetComponent<DeathmatchAgent>();
+        }
 
         /// <summary>
         /// Override Damage to add an extra damage amount depending on the bone hit.
@@ -21,7 +29,10 @@ namespace KopliSoft.Game
         /// <param name="attacker">The GameObject that did the damage.</param>
         public override void Damage(float amount, Vector3 position, Vector3 force, float radius, GameObject attacker, GameObject hitGameObject)
         {
-            //TODO: self-defence should be here
+            if (deathmatchAgent != null)
+            {
+                deathmatchAgent.TrackLayerAndTag(attacker.layer, attacker.tag);
+            }
             base.Damage(amount, position, force, radius, attacker, hitGameObject);
         }
 

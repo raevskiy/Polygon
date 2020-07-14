@@ -186,16 +186,6 @@ namespace KopliSoft.Behaviour
             disableBehaviorCounter++;
         }
 
-        public void UntrackEverything()
-        {
-            deathmatchAgent.TargetLayerMask = new LayerMask();
-        }
-
-        public void TrackPlayer()
-        {
-            deathmatchAgent.TargetLayerMask |= LayerMask.GetMask("Player");
-        }
-
         public void TrackTargetsInLayers(string layersCsv)
         {
             string[] layers = layersCsv.Split(',');

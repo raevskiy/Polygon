@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using KopliSoft.Inventory;
 using KopliSoft.Behaviour;
+using Opsive.DeathmatchAIKit.AI;
 
 namespace KopliSoft.Interaction
 {
@@ -101,8 +102,10 @@ namespace KopliSoft.Interaction
 
         private void AttackThief()
         {
+            DeathmatchAgent agent = GetComponentInParent<DeathmatchAgent>();
             PatrolController patrolController = GetComponentInParent<PatrolController>();
-            patrolController.TrackPlayer();
+
+            agent.TrackLayerAndTag(m_InteractorGameObject.layer, m_InteractorGameObject.tag);
             patrolController.CheckAlarm(m_InteractorGameObject);
         }
 
