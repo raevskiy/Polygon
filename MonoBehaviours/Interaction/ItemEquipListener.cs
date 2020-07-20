@@ -16,16 +16,16 @@ namespace KopliSoft.Interaction
 
         void Start()
         {
-            if (flowchart == null && flowchartName != null && flowchartName.Trim().Length != 0)
-            {
-                flowchart = GameObject.Find(flowchartName).GetComponent<Fungus.Flowchart>();
-            }
-
             EventHandler.RegisterEvent(gameObject, "OnInventoryItemEquipping", OnItemEquipping);
         }
 
         private void OnItemEquipping()
         {
+            if (flowchart == null && flowchartName != null && flowchartName.Trim().Length != 0)
+            {
+                flowchart = GameObject.Find(flowchartName).GetComponent<Fungus.Flowchart>();
+            }
+
             flowchart.ExecuteBlock(blockName);
             EventHandler.UnregisterEvent(gameObject, "OnInventoryItemEquipping", OnItemEquipping);
         }

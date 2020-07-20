@@ -10,6 +10,8 @@ namespace KopliSoft.Game
         [SerializeField]
         private List<CustomHealth> charactersToBeDefeated;
         [SerializeField]
+        private string flowchartName;
+        [SerializeField]
         private Flowchart flowchart;
         [SerializeField]
         private string blockName = "Main";
@@ -18,6 +20,11 @@ namespace KopliSoft.Game
 
         void Start()
         {
+            if (flowchart == null && flowchartName != null && flowchartName.Trim().Length != 0)
+            {
+                flowchart = GameObject.Find(flowchartName).GetComponent<Fungus.Flowchart>();
+            }
+
             CustomHealth.OnCharacterDefeated += OnCharacterDefeated;
         }
 
