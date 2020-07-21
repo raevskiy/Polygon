@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EndDebriefing : MonoBehaviour
+public class Debriefing : MonoBehaviour
 {
     [SerializeField]
     private string thisScene;
@@ -15,12 +15,26 @@ public class EndDebriefing : MonoBehaviour
     [SerializeField]
     private GameObject[] hiddenInNextScene;
 
+    [SerializeField]
+    private string flowchartName;
+    [SerializeField]
+    private Fungus.Flowchart flowchart;
+    [SerializeField]
+    private string blockName;
+
     private SceneController sceneController;
 
     // Start is called before the first frame update
     void Start()
     {
         sceneController = FindObjectOfType<SceneController>();
+
+        if (flowchart == null && flowchartName != null && flowchartName.Trim().Length != 0)
+        {
+            flowchart = GameObject.Find(flowchartName).GetComponent<Fungus.Flowchart>();
+        }
+
+        flowchart.ExecuteBlock(blockName);
     }
 
     // Update is called once per frame
