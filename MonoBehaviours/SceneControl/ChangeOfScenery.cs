@@ -1,5 +1,6 @@
 ﻿using AC.LSky;
 using KopliSoft.Behaviour;
+using Opsive.ThirdPersonController;
 using System.Collections;
 using UnityEngine;
 
@@ -31,9 +32,15 @@ namespace KopliSoft.SceneControl
         private float time = -1f;
         [SerializeField]
         private bool switchOnStart;
+        [SerializeField]
+        private bool switchOnTriggerEnter;
+        [SerializeField]
+        private LayerMask triggerLayerMask = (1 << LayerManager.Enemy) | (1 << LayerManager.Player);
+
 
         private SceneController sceneController;
         private LSkyTOD timeOfDay;
+        private GameObject collidedGameObject;
 
         void Start()
         {
@@ -42,6 +49,15 @@ namespace KopliSoft.SceneControl
 
             if (switchOnStart)
             {
+                Switch();
+            }
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (switchOnTriggerEnter && triggerLayerMask == (triggerLayerMask | (1 << other.gameObject.layer)) )
+            {
+                collidedGameObject = other.gameObject;
                 Switch();
             }
         }
@@ -128,19 +144,31 @@ namespace KopliSoft.SceneControl
 
         private void Teleport()
         {
-            for (int i = 0; i < charactersToTeleport.Length; i++)
+            if (switchOnTriggerEnter)
             {
-                GameObject character = SceneGraphSearch.Find(charactersToTeleport[i]);
-                PatrolController patrolController = character.GetComponent<PatrolController>();
-                if (patrolController != null && patrolController.enabled)
+                Teleport(collidedGameObject, teleports[0]);
+            }
+            else
+            {
+                for (int i = 0; i < charactersToTeleport.Length; i++)
                 {
-                    patrolController.TeleportToWaypoint(teleports[i]);
+                    GameObject character = SceneGraphSearch.Find(charactersToTeleport[i]);
+                    Teleport(character, teleports[i]);
                 }
-                else
-                {
-                    character.transform.position = teleports[i].transform.position;
-                    character.transform.rotation = teleports[i].transform.rotation;
-                }
+            }
+        }
+
+        private void Teleport(GameObject character, GameObject teleport)
+        {
+            PatrolController patrolController = character.GetComponent<PatrolController>();
+            if (patrolController != null && patrolController.enabled)
+            {
+                patrolController.TeleportToWaypoint(teleport);
+            }
+            else
+            {
+                character.transform.position = teleport.transform.position;
+                character.transform.rotation = teleport.transform.rotation;
             }
         }
 
