@@ -42,6 +42,8 @@ namespace KopliSoft.SceneControl
         private LSkyTOD timeOfDay;
         private GameObject collidedGameObject;
 
+        private bool inProgress;
+
         void Start()
         {
             sceneController = FindObjectOfType<SceneController>();
@@ -64,11 +66,16 @@ namespace KopliSoft.SceneControl
 
         public void Switch()
         {
-            if (fadeInDuration >=0 && fadeInDuration <  0.1f)
+            if (!inProgress)
             {
-                sceneController.faderCanvasGroup.alpha = 1.0f;
+                inProgress = true;
+
+                if (fadeInDuration >= 0 && fadeInDuration < 0.1f)
+                {
+                    sceneController.faderCanvasGroup.alpha = 1.0f;
+                }
+                StartCoroutine(FadeAndSwitch());
             }
-            StartCoroutine(FadeAndSwitch());
         }
 
         private IEnumerator FadeAndSwitch()
@@ -86,8 +93,10 @@ namespace KopliSoft.SceneControl
 
             if (fadeOutDuration >= 0)
             {
-                StartCoroutine(sceneController.Fade(0f, fadeOutDuration));
+                yield return StartCoroutine(sceneController.Fade(0f, fadeOutDuration));
             }
+
+            inProgress = false;
         }
 
         private void ChangeScenery()
