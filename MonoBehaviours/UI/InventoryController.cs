@@ -9,8 +9,8 @@ namespace KopliSoft.Inventory
         public GameObject inventory;
         public GameObject characterSystem;
         public GameObject craftSystem;
-        public CharacterSwitch characterSwitch;
 
+        private CharacterSwitch characterSwitch;
         private Inventory craftSystemInventory;
         private CraftSystem cS;
         private Inventory mainInventory;
@@ -55,6 +55,7 @@ namespace KopliSoft.Inventory
                 characterSystemInventory = characterSystem.GetComponent<Inventory>();
             if (craftSystem != null)
                 craftSystemInventory = craftSystem.GetComponent<Inventory>();
+            characterSwitch = FindObjectOfType<CharacterSwitch>();
         }
 
         public void OnEnable()
@@ -219,6 +220,7 @@ namespace KopliSoft.Inventory
                 }
                 else if ("Flowchart".Equals(attribute.attributeName))
                 {
+                    characterSwitch.GetCurrentCharacter().GetComponentInChildren<StorageInventory>().CloseStorage();
                     Fungus.Flowchart flowchart = GameObject.Find("/Story/Flowcharts/Items/item" + attribute.attributeValue).GetComponent<Fungus.Flowchart>();
                     flowchart.ExecuteBlock("Start");
                 }
