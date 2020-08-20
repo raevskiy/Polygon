@@ -57,7 +57,7 @@ namespace KopliSoft.SceneControl
 
         private void OnTriggerEnter(Collider other)
         {
-            if (switchOnTriggerEnter && triggerLayerMask == (triggerLayerMask | (1 << other.gameObject.layer)) )
+            if (!inProgress && switchOnTriggerEnter && triggerLayerMask == (triggerLayerMask | (1 << other.gameObject.layer)) )
             {
                 collidedGameObject = other.gameObject;
                 Switch();

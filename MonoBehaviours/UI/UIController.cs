@@ -1,6 +1,7 @@
 ﻿using Fungus;
 using UnityEngine;
 using KopliSoft.Inventory;
+using KopliSoft.Interaction;
 
 namespace KopliSoft.UI
 {
@@ -20,6 +21,7 @@ namespace KopliSoft.UI
             BlockSignals.OnBlockEnd += OnBlockEnd;
             Inventory.Inventory.InventoryOpen += InventoryOpened;
             Inventory.Inventory.InventoryClose += InventoryClosed;
+            BlimpInteractable.VehicleEvent += VehicleDriven;
             ShowPanels.PanelOpenedEvent += IncreaseGuiCounter;
             ShowPanels.PanelClosedEvent += DecreaseGuiCounter;
         }
@@ -30,8 +32,9 @@ namespace KopliSoft.UI
             BlockSignals.OnBlockEnd -= OnBlockEnd;
             Inventory.Inventory.InventoryOpen -= InventoryOpened;
             Inventory.Inventory.InventoryClose -= InventoryClosed;
-            ShowPanels.PanelOpenedEvent += IncreaseGuiCounter;
-            ShowPanels.PanelClosedEvent += DecreaseGuiCounter;
+            BlimpInteractable.VehicleEvent -= VehicleDriven;
+            ShowPanels.PanelOpenedEvent -= IncreaseGuiCounter;
+            ShowPanels.PanelClosedEvent -= DecreaseGuiCounter;
         }
 
         private void InventoryOpened()
@@ -42,6 +45,18 @@ namespace KopliSoft.UI
         private void InventoryClosed(Inventory.Inventory inv)
         {
             DecreaseGuiCounter();
+        }
+
+        private void VehicleDriven(bool driven)
+        {
+            if (driven)
+            {
+                IncreaseGuiCounter();
+            }
+            else
+            {
+                DecreaseGuiCounter();
+            }
         }
 
         private void OnBlockStart(Block block)
