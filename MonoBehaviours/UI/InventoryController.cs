@@ -220,8 +220,14 @@ namespace KopliSoft.Inventory
                 }
                 else if ("Flowchart".Equals(attribute.attributeName))
                 {
-                    characterSwitch.GetCurrentCharacter().GetComponentInChildren<StorageInventory>().CloseStorage();
+                    GameObject currentCharacter = characterSwitch.GetCurrentCharacter();
+                    currentCharacter.GetComponentInChildren<StorageInventory>().CloseStorage();
                     Fungus.Flowchart flowchart = GameObject.Find("/Story/Flowcharts/Items/item" + attribute.attributeValue).GetComponent<Fungus.Flowchart>();
+                    if (flowchart.HasVariable("Interviewer"))
+                    {
+                        flowchart.SetStringVariable("Interviewer", currentCharacter.tag);
+                    }
+
                     flowchart.ExecuteBlock("Start");
                 }
                 
