@@ -17,7 +17,13 @@ namespace KopliSoft.Interaction
         {
             StorageInventory destinationStorage = characterSwitch.GetCurrentCharacter().GetComponentInChildren<StorageInventory>();
             destinationStorage.AddItemToStorage(itemId, itemAmount);
+        }
 
+        public void Convert(int sourceItemId, int targetItemId)
+        {
+            StorageInventory destinationStorage = characterSwitch.GetCurrentCharacter().GetComponentInChildren<StorageInventory>();
+            destinationStorage.RemoveItemFromStorage(sourceItemId, 1);
+            destinationStorage.AddItemToStorage(targetItemId, 1);
         }
     }
 }
