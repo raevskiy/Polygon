@@ -24,7 +24,7 @@ namespace KopliSoft.Interaction
 
         void Update()
         {
-            if (inProgress && Input.GetAxis("Action") > 0 && blimpController.IsOnGround)
+            if (inProgress && Input.GetAxis("Mount") > 0 && blimpController.IsOnGround)
             {
                 StopInteracting();
             }

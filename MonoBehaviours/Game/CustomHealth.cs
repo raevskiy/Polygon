@@ -13,6 +13,8 @@ namespace KopliSoft.Game
         public delegate void CharacterDefeatedHandler(CustomHealth character);
 
         private DeathmatchAgent deathmatchAgent;
+        [SerializeField]
+        private GameObject[] enabledOnDeath;
 
         private void Start()
         {
@@ -56,6 +58,11 @@ namespace KopliSoft.Game
             }
 
             OnCharacterDefeated?.Invoke(this);
+
+            foreach (GameObject gameObject in enabledOnDeath)
+            {
+                gameObject.SetActive(true);
+            }
 
             base.Die(force, position, attacker);
         }
