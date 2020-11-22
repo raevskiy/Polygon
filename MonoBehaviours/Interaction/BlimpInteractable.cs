@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace KopliSoft.Interaction
 {
@@ -13,14 +11,9 @@ namespace KopliSoft.Interaction
         private bool inProgress;
         private Transform pilotParentTransform;
 
-        public delegate void VehicleDriven(bool driven);
-        public static event VehicleDriven VehicleEvent;
-
-        // Start is called before the first frame update
-        void Start()
-        {
-
-        }
+        public delegate void VehicleTaken();
+        public static event VehicleTaken EnterVehicleEvent;
+        public static event VehicleTaken ExitVehicleEvent;
 
         void Update()
         {
@@ -58,9 +51,19 @@ namespace KopliSoft.Interaction
             blimpController.enabled = interacting;
             blimpController.ControlPanel.enabled = interacting;
 
-            VehicleEvent?.Invoke(interacting);
-            //Opsive.ThirdPersonController.EventHandler.ExecuteEvent(m_InteractorGameObject, "OnAllowGameplayInput", !interacting);
+            if (interacting)
+            {
+                blimpController.SetPilot(m_InteractorGameObject.GetComponent<CharacterBehaviour>());
+                EnterVehicleEvent?.Invoke();
+            } else
+            {
+                blimpController.SetPilot(null);
+                ExitVehicleEvent?.Invoke();
+            }
+            
+            m_InteractorGameObject.GetComponent<CharacterBehaviour>().SetDriving(interacting);
             m_InteractorGameObject.GetComponent<Rigidbody>().isKinematic = interacting;
+            blimpController.GetComponent<Rigidbody>().isKinematic = !interacting;
         }
     }
 }

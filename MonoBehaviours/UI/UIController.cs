@@ -13,17 +13,19 @@ namespace KopliSoft.UI
         private InventoryController inventoryConroller;
 
         private int guiCounter = 0;
-        private bool inventoryOpened;
+        private int[] characterInputCounter;
 
         void Start()
         {
+            characterInputCounter = new int[characterSwitch.characters.Length];
             BlockSignals.OnBlockStart += OnBlockStart;
             BlockSignals.OnBlockEnd += OnBlockEnd;
             Inventory.Inventory.InventoryOpen += InventoryOpened;
             Inventory.Inventory.InventoryClose += InventoryClosed;
-            BlimpInteractable.VehicleEvent += VehicleDriven;
-            ShowPanels.PanelOpenedEvent += IncreaseGuiCounter;
-            ShowPanels.PanelClosedEvent += DecreaseGuiCounter;
+            ShowPanels.PanelOpenedEvent += IncreaseAllCounters;
+            ShowPanels.PanelClosedEvent += DecreaseAllCounters;
+            BlimpInteractable.EnterVehicleEvent += IncreaseInputCounter;
+            BlimpInteractable.ExitVehicleEvent += DecreaseInputCounter;
         }
 
         private void OnDestroy()
@@ -32,38 +34,25 @@ namespace KopliSoft.UI
             BlockSignals.OnBlockEnd -= OnBlockEnd;
             Inventory.Inventory.InventoryOpen -= InventoryOpened;
             Inventory.Inventory.InventoryClose -= InventoryClosed;
-            BlimpInteractable.VehicleEvent -= VehicleDriven;
-            ShowPanels.PanelOpenedEvent -= IncreaseGuiCounter;
-            ShowPanels.PanelClosedEvent -= DecreaseGuiCounter;
+            ShowPanels.PanelOpenedEvent -= IncreaseAllCounters;
+            ShowPanels.PanelClosedEvent -= DecreaseAllCounters;
         }
 
         private void InventoryOpened()
         {
-            IncreaseGuiCounter();
+            IncreaseAllCounters();
         }
 
         private void InventoryClosed(Inventory.Inventory inv)
         {
-            DecreaseGuiCounter();
-        }
-
-        private void VehicleDriven(bool driven)
-        {
-            if (driven)
-            {
-                IncreaseGuiCounter();
-            }
-            else
-            {
-                DecreaseGuiCounter();
-            }
+            DecreaseAllCounters();
         }
 
         private void OnBlockStart(Block block)
         {
             if (block.BlockName.Equals("Start"))
             {
-                IncreaseGuiCounter();
+                IncreaseAllCounters();
                 inventoryConroller.BlockInventoryUI();
             }
         }
@@ -72,33 +61,63 @@ namespace KopliSoft.UI
         {
             if (block.BlockName.Equals("End"))
             {
-                DecreaseGuiCounter();
+                DecreaseAllCounters();
                 inventoryConroller.UnblockInventoryUI();
             }
         }
 
-        private void IncreaseGuiCounter()
+        private void IncreaseAllCounters()
         {
             guiCounter++;
+            characterInputCounter[characterSwitch.GetCurrentCharacterIndex()]++;
+            OnCountersIncreased();
+        }
+
+        private void DecreaseAllCounters()
+        {
+            guiCounter--;
+            characterInputCounter[characterSwitch.GetCurrentCharacterIndex()]--;
+            OnCountersDecreased();
+        }
+
+        private void IncreaseInputCounter()
+        {
+            characterInputCounter[characterSwitch.GetCurrentCharacterIndex()]++;
+            OnCountersIncreased();
+        }
+
+        private void DecreaseInputCounter()
+        {
+            characterInputCounter[characterSwitch.GetCurrentCharacterIndex()]--;
+            OnCountersDecreased();
+        }
+
+        private void OnCountersIncreased()
+        {
             if (guiCounter == 1)
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-                Opsive.ThirdPersonController.EventHandler.ExecuteEvent(characterSwitch.GetCurrentCharacter(), "OnAllowGameplayInput", false);
                 characterSwitch.SetLocked(true);
+            }
+            if (characterInputCounter[characterSwitch.GetCurrentCharacterIndex()] == 1)
+            {
+                Opsive.ThirdPersonController.EventHandler.ExecuteEvent(characterSwitch.GetCurrentCharacter(), "OnAllowGameplayInput", false);
             }
         }
 
-        private void DecreaseGuiCounter()
+        private void OnCountersDecreased()
         {
-            guiCounter--;
             if (guiCounter == 0)
             {
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
+                characterSwitch.SetLocked(false);
+            }
+            if (characterInputCounter[characterSwitch.GetCurrentCharacterIndex()] == 0)
+            {
                 Opsive.ThirdPersonController.EventHandler.ExecuteEvent(characterSwitch.GetCurrentCharacter(), "OnAllowGameplayInput", true);
                 Input.ResetInputAxes();
-                characterSwitch.SetLocked(false);
             }
         }
     }

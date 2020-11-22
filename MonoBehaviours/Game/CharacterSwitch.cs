@@ -16,7 +16,7 @@ public class CharacterSwitch : MonoBehaviour
     public KopliSoft.Inventory.Inventory playerInventory;
     public KopliSoft.Inventory.Inventory npcInventory;
 
-    private int currentCharacter = 0;
+    private int currentCharacterIndex = 0;
     private bool locked;
 
     // Start is called before the first frame update
@@ -37,8 +37,8 @@ public class CharacterSwitch : MonoBehaviour
 
     public void Switch()
     {
-        GameObject oldCharacter = characters[currentCharacter];
-        string oldState = cameraStates[currentCharacter];
+        GameObject oldCharacter = characters[currentCharacterIndex];
+        string oldState = cameraStates[currentCharacterIndex];
 
         GameObject newCharacter = FindNewCharacter(oldCharacter);
         if (newCharacter == null)
@@ -60,7 +60,7 @@ public class CharacterSwitch : MonoBehaviour
         do
         {
             NextCharacter();
-            newCharacter = characters[currentCharacter];
+            newCharacter = characters[currentCharacterIndex];
             if (newCharacter == oldCharacter)
             {
                 return null;
@@ -77,10 +77,10 @@ public class CharacterSwitch : MonoBehaviour
 
     private void NextCharacter()
     {
-        currentCharacter++;
-        if (currentCharacter == characters.Length)
+        currentCharacterIndex++;
+        if (currentCharacterIndex == characters.Length)
         {
-            currentCharacter = 0;
+            currentCharacterIndex = 0;
         }
     }
 
@@ -100,6 +100,13 @@ public class CharacterSwitch : MonoBehaviour
 
     private void SwitchControlToAi(GameObject character, bool aiControl)
     {
+        CharacterBehaviour characterBehaviour = character.GetComponent<CharacterBehaviour>();
+        characterBehaviour.SetPlayerControlled(!aiControl);
+        if (characterBehaviour.IsDriving())
+        {
+            return;
+        }
+
         character.GetComponent<ControllerHandler>().enabled = !aiControl;
         character.GetComponent<ItemHandler>().enabled = !aiControl;
         character.GetComponent<UnityInput>().enabled = !aiControl;
@@ -122,16 +129,21 @@ public class CharacterSwitch : MonoBehaviour
         cameraController.Deactivate();
 
         cameraController.Anchor = newCharacter.transform;
-        cameraController.FadeTransform = fadeTransforms[currentCharacter];
+        cameraController.FadeTransform = fadeTransforms[currentCharacterIndex];
         cameraController.DeathAnchor = newCharacter.transform;
 
         cameraController.InitializeCharacter(newCharacter);
-        cameraController.ChangeState(cameraStates[currentCharacter], true);
+        cameraController.ChangeState(cameraStates[currentCharacterIndex], true);
     }
 
     public GameObject GetCurrentCharacter()
     {
-        return characters[currentCharacter];
+        return characters[currentCharacterIndex];
+    }
+
+    public int GetCurrentCharacterIndex()
+    {
+        return currentCharacterIndex;
     }
 
     public void SetLocked(bool locked)
