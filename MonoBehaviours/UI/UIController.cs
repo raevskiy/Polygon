@@ -24,8 +24,8 @@ namespace KopliSoft.UI
             Inventory.Inventory.InventoryClose += InventoryClosed;
             ShowPanels.PanelOpenedEvent += IncreaseAllCounters;
             ShowPanels.PanelClosedEvent += DecreaseAllCounters;
-            BlimpInteractable.EnterVehicleEvent += IncreaseInputCounter;
-            BlimpInteractable.ExitVehicleEvent += DecreaseInputCounter;
+            BlimpOnboarding.EnterVehicleEvent += IncreaseInputCounter;
+            BlimpOnboarding.ExitVehicleEvent += DecreaseInputCounter;
         }
 
         private void OnDestroy()

@@ -5,65 +5,45 @@ namespace KopliSoft.Interaction
     public class BlimpInteractable : BaseInteractable
     {
         [SerializeField]
-        private HelicopterController blimpController;
-        [SerializeField]
         private Transform pilotTransform;
-        private bool inProgress;
-        private Transform pilotParentTransform;
+        [SerializeField]
+        private Transform[] passengerTransforms;
 
-        public delegate void VehicleTaken();
-        public static event VehicleTaken EnterVehicleEvent;
-        public static event VehicleTaken ExitVehicleEvent;
+        private BlimpOnboarding onboardingController;
 
-        void Update()
+        void Start()
         {
-            if (inProgress && Input.GetAxis("Mount") > 0 && blimpController.IsOnGround)
-            {
-                StopInteracting();
-            }
+            onboardingController = GetComponent<BlimpOnboarding>();
         }
 
         public override bool CanInteract()
         {
-            return !inProgress && m_Interactor != null;
+            return m_InteractorGameObject != null && !m_InteractorGameObject.GetComponent<CharacterBehaviour>().IsDriving();
         }
 
         public override void Interact()
         {
-            InteractSwitch(true);
+            Transform pivot = FindPivotTransform();
 
-            pilotParentTransform = m_InteractorGameObject.transform.parent;
-            m_InteractorGameObject.transform.SetParent(blimpController.transform);
-            m_InteractorGameObject.transform.position = pilotTransform.position;
-            m_InteractorGameObject.transform.rotation = pilotTransform.rotation;
+            onboardingController.InteractSwitch(pivot, true);
+
+            m_InteractorGameObject.transform.SetParent(pivot);
+            m_InteractorGameObject.transform.localPosition = Vector3.zero;
+            m_InteractorGameObject.transform.localRotation = Quaternion.identity;
         }
 
-        public void StopInteracting()
+
+        private Transform FindPivotTransform()
         {
-            InteractSwitch(false);
-
-            m_InteractorGameObject.transform.SetParent(pilotParentTransform);
-        }
-
-        private void InteractSwitch(bool interacting)
-        {
-            inProgress = interacting;
-            blimpController.enabled = interacting;
-            blimpController.ControlPanel.enabled = interacting;
-
-            if (interacting)
+            CharacterBehaviour characterBehaviour = m_InteractorGameObject.GetComponent<CharacterBehaviour>();
+            if (characterBehaviour.IsAbleToDriveBlimp() && pilotTransform.childCount == 0)
             {
-                blimpController.SetPilot(m_InteractorGameObject.GetComponent<CharacterBehaviour>());
-                EnterVehicleEvent?.Invoke();
+                return pilotTransform;
             } else
             {
-                blimpController.SetPilot(null);
-                ExitVehicleEvent?.Invoke();
+                return passengerTransforms[0];
             }
-            
-            m_InteractorGameObject.GetComponent<CharacterBehaviour>().SetDriving(interacting);
-            m_InteractorGameObject.GetComponent<Rigidbody>().isKinematic = interacting;
-            blimpController.GetComponent<Rigidbody>().isKinematic = !interacting;
         }
+
     }
 }

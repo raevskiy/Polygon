@@ -2,6 +2,8 @@
 
 public class CharacterBehaviour : MonoBehaviour
 {
+    [SerializeField]
+    private bool ableToDriveBlimp;
     private bool driving;
     private bool playerControlled;
 
@@ -23,5 +25,10 @@ public class CharacterBehaviour : MonoBehaviour
     public void SetPlayerControlled(bool playerControlled)
     {
         this.playerControlled = playerControlled;
+    }
+
+    public bool IsAbleToDriveBlimp()
+    {
+        return ableToDriveBlimp;
     }
 }
