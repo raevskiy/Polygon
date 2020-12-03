@@ -34,11 +34,11 @@ namespace KopliSoft.Interaction
         {
             Transform currentCharacterTransform = characterSwitch.GetCurrentCharacter().transform;
 
-            InteractSwitch(currentCharacterTransform.parent, false);
+            SwitchOnboarding(currentCharacterTransform.parent, false);
             currentCharacterTransform.SetParent(characterSwitch.transform);
         }
 
-        public void InteractSwitch(Transform pivot, bool interacting)
+        public void SwitchOnboarding(Transform pivot, bool interacting)
         {
             GameObject currentCharacter = characterSwitch.GetCurrentCharacter();
             currentCharacter.GetComponent<CharacterBehaviour>().SetDriving(interacting);

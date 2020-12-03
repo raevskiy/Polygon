@@ -18,14 +18,16 @@ namespace KopliSoft.Interaction
 
         public override bool CanInteract()
         {
-            return m_InteractorGameObject != null && !m_InteractorGameObject.GetComponent<CharacterBehaviour>().IsDriving();
+            return m_InteractorGameObject != null 
+                && !m_InteractorGameObject.GetComponent<CharacterBehaviour>().IsDriving()
+                && FindPivotTransform() != null;
         }
 
         public override void Interact()
         {
             Transform pivot = FindPivotTransform();
 
-            onboardingController.InteractSwitch(pivot, true);
+            onboardingController.SwitchOnboarding(pivot, true);
 
             m_InteractorGameObject.transform.SetParent(pivot);
             m_InteractorGameObject.transform.localPosition = Vector3.zero;
@@ -41,7 +43,14 @@ namespace KopliSoft.Interaction
                 return pilotTransform;
             } else
             {
-                return passengerTransforms[0];
+                foreach (Transform passengerTransform in passengerTransforms)
+                {
+                    if (passengerTransform.childCount == 0)
+                    {
+                        return passengerTransform;
+                    }
+                }
+                return null;
             }
         }
 
