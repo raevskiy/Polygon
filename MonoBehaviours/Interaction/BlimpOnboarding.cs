@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Opsive.ThirdPersonController;
 using UnityEngine;
 
 namespace KopliSoft.Interaction
@@ -9,7 +8,7 @@ namespace KopliSoft.Interaction
         [SerializeField]
         private Transform pilotTransform;
         [SerializeField]
-        private HelicopterController blimpController;
+        private BlimpController blimpController;
 
         private CharacterSwitch characterSwitch;
 
@@ -67,6 +66,11 @@ namespace KopliSoft.Interaction
                     blimpController.SetPilot(null);
                 }
             }
+        }
+
+        private void OnDeath(Vector3 force, Vector3 position, GameObject attacker)
+        {
+            StopInteracting();
         }
     }
 }

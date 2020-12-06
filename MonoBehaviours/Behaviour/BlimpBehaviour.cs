@@ -5,13 +5,13 @@ namespace KopliSoft.Behaviour
 {
     public class BlimpBehaviour : MonoBehaviour
     {
-        private HelicopterController controller;
+        private BlimpController controller;
         private CustomHealth health;
 
         // Start is called before the first frame update
         void Start()
         {
-            controller = GetComponent<HelicopterController>();
+            controller = GetComponent<BlimpController>();
             health = GetComponent<CustomHealth>();
             CustomHealth.OnCharacterDefeated += OnCharacterDefeated;
         }

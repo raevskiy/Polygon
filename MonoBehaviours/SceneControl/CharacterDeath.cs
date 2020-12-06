@@ -18,6 +18,8 @@ namespace Opsive.ThirdPersonController
 
         public override void Spawn()
         {
+            transform.SetParent(characterSwitch.transform);
+
             if (missionCriticalCharacter)
             {
                 Destroy(GameObject.Find("Menu UI"));
