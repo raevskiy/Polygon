@@ -18,7 +18,7 @@ public class BlimpController : MonoBehaviour
     public float turnForcePercent = 1.3f;
 
     [SerializeField]
-    private LayerMask groundLayers;
+    private LandingTrigger[] landingTriggers;
     [SerializeField]
     private float engineForceMax;
     private float _engineForce;
@@ -47,7 +47,6 @@ public class BlimpController : MonoBehaviour
     private Vector2 hMove = Vector2.zero;
     private Vector2 hTilt = Vector2.zero;
     private float hTurn = 0f;
-    public bool IsOnGround = true;
     private CharacterBehaviour pilot;
 
     // Use this for initialization
@@ -132,34 +131,34 @@ public class BlimpController : MonoBehaviour
 
                     case PressedKeyCode.ForwardPressed:
 
-                    if (IsOnGround) break;
+                    if (IsOnGround()) break;
                     tempY = Time.fixedDeltaTime;
                     break;
                     case PressedKeyCode.BackPressed:
 
-                    if (IsOnGround) break;
+                    if (IsOnGround()) break;
                     tempY = -Time.fixedDeltaTime;
                     break;
                     case PressedKeyCode.LeftPressed:
 
-                    if (IsOnGround) break;
+                    if (IsOnGround()) break;
                     tempX = -Time.fixedDeltaTime;
                     break;
                     case PressedKeyCode.RightPressed:
 
-                    if (IsOnGround) break;
+                    if (IsOnGround()) break;
                     tempX = Time.fixedDeltaTime;
                     break;
                     case PressedKeyCode.TurnRightPressed:
                     {
-                        if (IsOnGround) break;
+                        if (IsOnGround()) break;
                         var force = (turnForcePercent - Mathf.Abs(hMove.y))*HelicopterModel.mass;
                         HelicopterModel.AddRelativeTorque(0f, force, 0);
                     }
                     break;
                     case PressedKeyCode.TurnLeftPressed:
                     {
-                        if (IsOnGround) break;
+                        if (IsOnGround()) break;
                         
                         var force = -(turnForcePercent - Mathf.Abs(hMove.y))*HelicopterModel.mass;
                         HelicopterModel.AddRelativeTorque(0f, force, 0);
@@ -177,20 +176,22 @@ public class BlimpController : MonoBehaviour
 
     }
 
-    private void OnCollisionEnter(Collision collision)
+    public bool IsOnGround()
     {
-        if (groundLayers == (groundLayers | (1 << collision.gameObject.layer)))
+        if (engineForceMax == 0)
         {
-            IsOnGround = true;
+            return true;
         }
-    }
 
-    private void OnCollisionExit(Collision collision)
-    {
-        if (engineForceMax > 0 && groundLayers == (groundLayers | (1 << collision.gameObject.layer)))
+        int landed = 0;
+        foreach (LandingTrigger trigger in landingTriggers)
         {
-            IsOnGround = false;
+            if (trigger.IsLanded())
+            {
+                landed++;
+            }
         }
+        return landed > 1;
     }
 
     public void BreakDown()

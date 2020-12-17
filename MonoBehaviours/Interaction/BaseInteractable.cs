@@ -37,7 +37,7 @@ namespace KopliSoft.Interaction
             {
                 m_Interactor = other.transform;
                 m_InteractorGameObject = other.gameObject;
-                EventHandler.ExecuteEvent<IInteractable>(m_Interactor.gameObject, "OnInteractableHasInteractable", this);
+                EventHandler.ExecuteEvent<IInteractable, bool>(m_Interactor.gameObject, "OnInteractableHasInteractable", this, true);
                 enabled = true;
             }
         }
@@ -46,11 +46,17 @@ namespace KopliSoft.Interaction
         {
             if (other.transform.Equals(m_Interactor))
             {
-                EventHandler.ExecuteEvent<IInteractable>(m_Interactor.gameObject, "OnInteractableHasInteractable", null);
-                m_Interactor = null;
-                enabled = false;
+                OnTriggerExit();
             }
         }
+
+        protected void OnTriggerExit()
+        {
+            EventHandler.ExecuteEvent<IInteractable, bool>(m_Interactor.gameObject, "OnInteractableHasInteractable", this, false);
+            m_Interactor = null;
+            enabled = false;
+        }
+
 
         private void OnDestroy()
         {

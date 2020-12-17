@@ -12,6 +12,10 @@ namespace KopliSoft.Game
         public static event CharacterDefeatedHandler OnCharacterDefeated;
         public delegate void CharacterDefeatedHandler(CustomHealth character);
 
+        public static event CharacterDamagedHandler OnCharacterDamaged;
+        public delegate void CharacterDamagedHandler(CustomHealth character, float amount, Vector3 position, Vector3 attackerPosition);
+
+
         private DeathmatchAgent deathmatchAgent;
         [SerializeField]
         private GameObject[] enabledOnDeath;
@@ -36,6 +40,11 @@ namespace KopliSoft.Game
                 deathmatchAgent.TrackLayerAndTag(attacker.layer, attacker.tag);
             }
             base.Damage(amount, position, force, radius, attacker, hitGameObject);
+
+            if (amount > 0)
+            {
+                OnCharacterDamaged?.Invoke(this, amount, position, attacker.transform.position);
+            }
         }
 
         /// <summary>

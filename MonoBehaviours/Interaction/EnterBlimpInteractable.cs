@@ -2,7 +2,7 @@
 
 namespace KopliSoft.Interaction
 {
-    public class BlimpInteractable : BaseInteractable
+    public class EnterBlimpInteractable : BaseInteractable
     {
         [SerializeField]
         private Transform pilotTransform;
@@ -13,7 +13,7 @@ namespace KopliSoft.Interaction
 
         void Start()
         {
-            onboardingController = GetComponent<BlimpOnboarding>();
+            onboardingController = GetComponentInParent<BlimpOnboarding>();
         }
 
         public override bool CanInteract()
@@ -27,7 +27,7 @@ namespace KopliSoft.Interaction
         {
             Transform pivot = FindPivotTransform();
 
-            onboardingController.SwitchOnboarding(pivot, true);
+            onboardingController.SwitchOnboarding(m_InteractorGameObject, pivot, true);
 
             m_InteractorGameObject.transform.SetParent(pivot);
             m_InteractorGameObject.transform.localPosition = Vector3.zero;

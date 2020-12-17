@@ -5,6 +5,7 @@ public class CharacterBehaviour : MonoBehaviour
     [SerializeField]
     private bool ableToDriveBlimp;
     private bool driving;
+    [SerializeField]
     private bool playerControlled;
 
     public bool IsDriving()
