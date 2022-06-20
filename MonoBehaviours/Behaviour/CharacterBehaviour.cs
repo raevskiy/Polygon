@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using BehaviorDesigner.Runtime;
+using UnityEngine;
 
 public class CharacterBehaviour : MonoBehaviour
 {
@@ -8,6 +9,28 @@ public class CharacterBehaviour : MonoBehaviour
     [SerializeField]
     private bool playerControlled;
 
+    [SerializeField]
+    public ExternalBehaviorTree soloTree;
+    [SerializeField]
+    public ExternalBehaviorTree teamTree;
+
+    private BehaviorTree behaviorTree;
+
+    private void Start()
+    {
+        behaviorTree = GetComponent<BehaviorTree>();
+    }
+
+    public void switchToSolo()
+    {
+        behaviorTree.ExternalBehavior = soloTree;
+    }
+
+    public void switchToTeam()
+    {
+        behaviorTree.ExternalBehavior = teamTree;
+    }
+    
     public bool IsDriving()
     {
         return driving;

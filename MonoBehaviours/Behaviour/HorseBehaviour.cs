@@ -17,6 +17,7 @@ namespace KopliSoft.Behaviour
             health = GetComponent<CustomHealth>();
             animal = GetComponent<Animal>();
             CustomHealth.OnCharacterDamaged += OnCharacterDamaged;
+            CustomHealth.OnCharacterDefeated += OnCharacterDefeated;
         }
 
         private void OnCharacterDamaged(CustomHealth health, float amount, Vector3 position, Vector3 attackerPosition)
@@ -26,5 +27,14 @@ namespace KopliSoft.Behaviour
                 animal.getDamaged(position, attackerPosition, amount);
             }
         }
+
+        private void OnCharacterDefeated(CustomHealth health)
+        {
+            if (this.health == health)
+            {
+                animal.Death = true;
+            }
+        }
+
     }
 }

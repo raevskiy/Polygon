@@ -21,7 +21,7 @@ namespace KopliSoft.Interaction
             if (m_InteractorGameObject != null)
             {
                 CharacterBehaviour characterBehaviour = m_InteractorGameObject.GetComponent<CharacterBehaviour>();
-                return characterBehaviour.IsDriving() && blimpController.IsOnGround();
+                return characterBehaviour.IsDriving() && blimpController.GetComponent<Rigidbody>().velocity.magnitude < 1;
             }
             return false;
         }

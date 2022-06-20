@@ -1,5 +1,4 @@
-﻿using Opsive.ThirdPersonController;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace KopliSoft.Interaction
 {
@@ -7,6 +6,8 @@ namespace KopliSoft.Interaction
     {
         [SerializeField]
         private Transform pilotTransform;
+        [SerializeField]
+        private GameObject deckUnderPilot;
         [SerializeField]
         private BlimpController blimpController;
 
@@ -18,6 +19,7 @@ namespace KopliSoft.Interaction
         {
             currentCharacter.GetComponent<CharacterBehaviour>().SetDriving(interacting);
             currentCharacter.GetComponent<Rigidbody>().isKinematic = interacting;
+            currentCharacter.GetComponent<CapsuleCollider>().enabled = !interacting;
             if (interacting)
             {
                 EnterVehicleEvent?.Invoke();
@@ -29,18 +31,8 @@ namespace KopliSoft.Interaction
 
             if (pivot == pilotTransform)
             {
-                blimpController.enabled = interacting;
-                blimpController.GetComponent<Rigidbody>().isKinematic = !interacting;
                 blimpController.ControlPanel.enabled = interacting;
-
-                if (interacting)
-                {
-                    blimpController.SetPilot(currentCharacter.GetComponent<CharacterBehaviour>());
-                }
-                else
-                {
-                    blimpController.SetPilot(null);
-                }
+                deckUnderPilot.SetActive(!interacting);
             }
         }
     }

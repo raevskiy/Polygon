@@ -181,6 +181,8 @@ namespace KopliSoft.Inventory
 
         public bool OnConsumeItem(Item item)
         {
+            GameObject currentCharacter = characterSwitch.GetCurrentCharacter();
+
             foreach (ItemAttribute attribute in item.itemAttributes)
             {
                 if ("Health".Equals(attribute.attributeName))
@@ -206,7 +208,6 @@ namespace KopliSoft.Inventory
                 }
                 else if ("ShotgunAmmo".Equals(attribute.attributeName))
                 {
-                    GameObject currentCharacter = characterSwitch.GetCurrentCharacter();
                     Opsive.ThirdPersonController.Wrappers.Inventory opsiveInventory = currentCharacter.GetComponent<Opsive.ThirdPersonController.Wrappers.Inventory>();
                     if (opsiveInventory.HasItem(1650912923))
                     {
@@ -218,20 +219,22 @@ namespace KopliSoft.Inventory
                         return false;
                     }
                 }
-                else if ("Flowchart".Equals(attribute.attributeName))
-                {
-                    GameObject currentCharacter = characterSwitch.GetCurrentCharacter();
-                    currentCharacter.GetComponentInChildren<StorageInventory>().CloseStorage();
-                    Fungus.Flowchart flowchart = GameObject.Find("/Story/Flowcharts/Items/item" + attribute.attributeValue).GetComponent<Fungus.Flowchart>();
-                    if (flowchart.HasVariable("Interviewer"))
-                    {
-                        flowchart.SetStringVariable("Interviewer", currentCharacter.tag);
-                    }
-
-                    flowchart.ExecuteBlock("Start");
-                }
-                
             }
+
+            GameObject flowchartGameObject = GameObject.Find("/Story/Flowcharts/Items/item" + item.itemID);
+            if (flowchartGameObject != null)
+            {
+                currentCharacter.GetComponentInChildren<StorageInventory>().CloseStorage();
+                Fungus.Flowchart flowchart = flowchartGameObject.GetComponent<Fungus.Flowchart>();
+                if (flowchart.HasVariable("Interviewer"))
+                {
+                    flowchart.SetStringVariable("Interviewer", currentCharacter.tag);
+                }
+
+                flowchart.ExecuteBlock("Start");
+                return false;
+            }
+
             return true;
         }
 

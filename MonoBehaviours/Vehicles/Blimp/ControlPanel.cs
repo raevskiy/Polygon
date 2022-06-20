@@ -28,11 +28,11 @@ public class ControlPanel : MonoBehaviour {
         }
         if (Input.GetAxis("Horizontal") > 0)
         {
-            pressedKeyCode.Add(PressedKeyCode.RightPressed);
+            pressedKeyCode.Add(PressedKeyCode.TurnRightPressed);
         }
         if (Input.GetAxis("Horizontal") < 0)
         {
-            pressedKeyCode.Add(PressedKeyCode.LeftPressed);
+            pressedKeyCode.Add(PressedKeyCode.TurnLeftPressed);
         }
 
         KeyPressed?.Invoke(pressedKeyCode.ToArray());

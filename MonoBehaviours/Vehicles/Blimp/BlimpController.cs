@@ -5,8 +5,7 @@ public class BlimpController : MonoBehaviour
     public AudioSource HelicopterSound;
     public ControlPanel ControlPanel;
     public Rigidbody HelicopterModel;
-    public RotorController MainRotorController;
-    public RotorController SubRotorController;
+    public RotorController[] Rotors;    
 
     public float TurnForce = 3f;
     public float ForwardForce = 10f;
@@ -21,24 +20,23 @@ public class BlimpController : MonoBehaviour
     private LandingTrigger[] landingTriggers;
     [SerializeField]
     private float engineForceMax;
+    [SerializeField]
+    private float engineForceMin = 0;
+    [SerializeField]
+    private float engineForceInitial;
+
     private float _engineForce;
     public float EngineForce
     {
         get { return _engineForce; }
         set
         {
-            if (MainRotorController != null)
+            foreach (RotorController rotor in Rotors)
             {
-                MainRotorController.RotarSpeed = value * 80;
-            }
-            if (SubRotorController != null)
-            {
-                SubRotorController.RotarSpeed = value * 40;
+                rotor.RotarSpeed = value * 40;
             }
             
             HelicopterSound.pitch = Mathf.Clamp(value / 40, 0, 1.2f);
-           // if (UIGameController.runtime.EngineForceView != null)
-           //     UIGameController.runtime.EngineForceView.text = string.Format("Engine value [ {0} ] ", (int)value);
 
             _engineForce = value;
         }
@@ -47,24 +45,22 @@ public class BlimpController : MonoBehaviour
     private Vector2 hMove = Vector2.zero;
     private Vector2 hTilt = Vector2.zero;
     private float hTurn = 0f;
-    private CharacterBehaviour pilot;
 
     // Use this for initialization
     void Start ()
 	{
         ControlPanel.KeyPressed += OnKeyPressed;
+        EngineForce = engineForceInitial;
 	}
 
-    public void SetPilot(CharacterBehaviour pilot)
-    {
-        this.pilot = pilot;
-    }
-  
     void FixedUpdate()
     {
         LiftProcess();
-        MoveProcess();
-        TiltProcess();
+        if (ControlPanel.enabled)
+        {
+            MoveProcess();
+            //TiltProcess();
+        }
     }
 
     private void MoveProcess()
@@ -72,7 +68,8 @@ public class BlimpController : MonoBehaviour
         var turn = TurnForce * Mathf.Lerp(hMove.x, hMove.x * (turnTiltForcePercent - Mathf.Abs(hMove.y)), Mathf.Max(0f, hMove.y));
         hTurn = Mathf.Lerp(hTurn, turn, Time.fixedDeltaTime * TurnForce);
         HelicopterModel.AddRelativeTorque(0f, hTurn * HelicopterModel.mass, 0f);
-        HelicopterModel.AddRelativeForce(Vector3.forward * Mathf.Max(0f, hMove.y * ForwardForce * HelicopterModel.mass));
+        //HelicopterModel.AddRelativeForce(Vector3.forward * Mathf.Max(0f, hMove.y * ForwardForce * HelicopterModel.mass));
+        HelicopterModel.AddRelativeForce(Vector3.forward * hMove.y * ForwardForce * HelicopterModel.mass);
     }
 
     private void LiftProcess()
@@ -91,11 +88,6 @@ public class BlimpController : MonoBehaviour
 
     private void OnKeyPressed(PressedKeyCode[] obj)
     {
-        if (pilot == null || !pilot.IsPlayerControlled())
-        {
-            return;
-        }
-
         float tempY = 0;
         float tempX = 0;
 
@@ -126,7 +118,7 @@ public class BlimpController : MonoBehaviour
                 case PressedKeyCode.SpeedDownPressed:
 
                     EngineForce -= 0.12f;
-                    if (EngineForce < 0) EngineForce = 0;
+                    if (EngineForce < engineForceMin) EngineForce = engineForceMin;
                     break;
 
                     case PressedKeyCode.ForwardPressed:
@@ -198,5 +190,14 @@ public class BlimpController : MonoBehaviour
     {
         EngineForce = 0;
         engineForceMax = 0;
+    }
+
+    public void SetEngineForceMin(float engineForceMin)
+    {
+        this.engineForceMin = engineForceMin;
+        if (EngineForce < engineForceMin)
+        {
+            EngineForce = engineForceMin;
+        }
     }
 }
