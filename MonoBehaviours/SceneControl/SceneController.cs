@@ -17,7 +17,6 @@ namespace KopliSoft.SceneControl
         public float fadeDuration = 1f;                 // How long it should take to fade to and from black.
         private bool isFading;
 
-        public string startingSceneName = "MainScene";
         public Flowchart chapterInfo;
         private string currentChapter;
 
@@ -31,23 +30,11 @@ namespace KopliSoft.SceneControl
         private enum SceneState {NONE, TO_LOAD, TO_UNLOAD, LOADING, UNLOADING, LOADED};
         private Dictionary<string, SceneState> seamleassScenes = new Dictionary<string, SceneState>();
 
-        private IEnumerator Start()
+        private void Start()
         {
-            BlockSignals.OnBlockEnd += OnBlockEnd;
-
             Application.backgroundLoadingPriority = ThreadPriority.Low;
             faderCanvasGroup.alpha = 1f;
-            yield return StartCoroutine(LoadScenes(new string[] { startingSceneName }));
-            if (!ShowChapterInfo(startingSceneName))
-            {
-                StartCoroutine(Fade(0f, this.fadeDuration));
-            }
             StartCoroutine(SeamlessSceneDaemon(2));
-        }
-
-        private void OnDestroy()
-        {
-            BlockSignals.OnBlockEnd -= OnBlockEnd;
         }
 
         public void FadeAndSwitchScenes(string sceneNamesToLoad, string sceneNamesToUnload)
@@ -82,10 +69,7 @@ namespace KopliSoft.SceneControl
 
             AfterSceneLoad?.Invoke();
 
-            if (!ShowChapterInfo(sceneNamesToLoad))
-            {
-                StartCoroutine(Fade(0f, this.fadeDuration));
-            }
+            StartFade(0f, this.fadeDuration);
         }
 
         private bool IsDebriefing(string[] sceneNamesToLoad)
@@ -115,43 +99,7 @@ namespace KopliSoft.SceneControl
                 }
             }
         }
-
-        private bool ShowChapterInfo(string[] sceneNames)
-        {
-            foreach (string sceneName in sceneNames)
-            {
-                if (ShowChapterInfo(sceneName))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private bool ShowChapterInfo(string sceneName)
-        {
-            string currentChapterBackup = currentChapter;
-            currentChapter = sceneName;
-            bool hasBlock = chapterInfo.ExecuteIfHasBlock(sceneName);
-            if (!hasBlock)
-            {
-                currentChapter = currentChapterBackup;
-            }
-            return hasBlock;
-        }
-
-        void OnBlockEnd(Block block)
-        {
-            if (block.BlockName.Equals(currentChapter))
-            {
-                StartCoroutine(Fade(0f, this.fadeDuration));
-                GameObject chapter = GameObject.Find("/Story/" + currentChapter);
-                if (chapter != null)
-                {
-                    chapter.GetComponent<Flowchart>().ExecuteBlock("Main");
-                }
-            }
-        }
+ 
 
         private IEnumerator LoadScenes(string[] sceneNames)
         {
@@ -167,6 +115,11 @@ namespace KopliSoft.SceneControl
             {
                 yield return SceneManager.UnloadSceneAsync(sceneName);
             }
+        }
+
+        public void StartFade(float finalAlpha, float fadeDuration)
+        {
+            StartCoroutine(Fade(finalAlpha, fadeDuration));
         }
 
         public IEnumerator Fade(float finalAlpha, float fadeDuration)
