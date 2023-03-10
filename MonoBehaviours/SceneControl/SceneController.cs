@@ -18,14 +18,11 @@ namespace KopliSoft.SceneControl
         private bool isFading;
 
         public Flowchart chapterInfo;
-        private string currentChapter;
 
         [SerializeField]
         private PatrolController[] mainCharacters;
         [SerializeField]
         private GameObject vault;
-        [SerializeField]
-        private GameObject[] hiddenInDebriefing;
 
         private enum SceneState {NONE, TO_LOAD, TO_UNLOAD, LOADING, UNLOADING, LOADED};
         private Dictionary<string, SceneState> seamleassScenes = new Dictionary<string, SceneState>();
@@ -55,15 +52,7 @@ namespace KopliSoft.SceneControl
             yield return StartCoroutine(Fade(1f, this.fadeDuration));
 
             BeforeSceneUnload?.Invoke();
-            if (IsDebriefing(sceneNamesToLoad))
-            {
-                MoveCharactersToVault();
-                foreach (GameObject gameObject in hiddenInDebriefing)
-                {
-                    gameObject.SetActive(false);
-                }
-            }
-
+ 
             yield return StartCoroutine(UnloadScenes(sceneNamesToUnload));
             yield return StartCoroutine(LoadScenes(sceneNamesToLoad));
 
@@ -71,19 +60,7 @@ namespace KopliSoft.SceneControl
 
             StartFade(0f, this.fadeDuration);
         }
-
-        private bool IsDebriefing(string[] sceneNamesToLoad)
-        {
-            foreach (string sceneName in sceneNamesToLoad)
-            {
-                if (sceneName.ToLower().Contains("debriefing"))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
+ 
         private void MoveCharactersToVault()
         {
             foreach (PatrolController character in mainCharacters)
