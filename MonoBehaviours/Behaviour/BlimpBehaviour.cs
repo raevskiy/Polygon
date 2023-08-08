@@ -20,7 +20,7 @@ namespace KopliSoft.Behaviour
         {
             if (this.health == health)
             {
-                controller.BreakDown();
+                controller.FullStop();
             }
         }
     }

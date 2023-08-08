@@ -2,9 +2,9 @@
 
 public class BlimpController : MonoBehaviour
 {
-    public AudioSource HelicopterSound;
+    public AudioSource EngineSound;
     public ControlPanel ControlPanel;
-    public Rigidbody HelicopterModel;
+    public Rigidbody BlimpBody;
     public RotorController[] Rotors;    
 
     public float TurnForce = 3f;
@@ -36,7 +36,7 @@ public class BlimpController : MonoBehaviour
                 rotor.RotarSpeed = value * 40;
             }
             
-            HelicopterSound.pitch = Mathf.Clamp(value / 40, 0, 1.2f);
+            EngineSound.pitch = Mathf.Clamp(value / 40, 0, 1.2f);
 
             _engineForce = value;
         }
@@ -56,7 +56,7 @@ public class BlimpController : MonoBehaviour
     void FixedUpdate()
     {
         LiftProcess();
-        if (ControlPanel.enabled)
+        if (ControlPanel.enabled && !IsOnGround())
         {
             MoveProcess();
             //TiltProcess();
@@ -67,23 +67,23 @@ public class BlimpController : MonoBehaviour
     {
         var turn = TurnForce * Mathf.Lerp(hMove.x, hMove.x * (turnTiltForcePercent - Mathf.Abs(hMove.y)), Mathf.Max(0f, hMove.y));
         hTurn = Mathf.Lerp(hTurn, turn, Time.fixedDeltaTime * TurnForce);
-        HelicopterModel.AddRelativeTorque(0f, hTurn * HelicopterModel.mass, 0f);
+        BlimpBody.AddRelativeTorque(0f, hTurn * BlimpBody.mass, 0f);
         //HelicopterModel.AddRelativeForce(Vector3.forward * Mathf.Max(0f, hMove.y * ForwardForce * HelicopterModel.mass));
-        HelicopterModel.AddRelativeForce(Vector3.forward * hMove.y * ForwardForce * HelicopterModel.mass);
+        BlimpBody.AddRelativeForce(Vector3.forward * hMove.y * ForwardForce * BlimpBody.mass);
     }
 
     private void LiftProcess()
     {
-        var upForce = 1 - Mathf.Clamp(HelicopterModel.transform.position.y / EffectiveHeight, 0, 1);
-        upForce = Mathf.Lerp(0f, EngineForce, upForce) * HelicopterModel.mass;
-        HelicopterModel.AddRelativeForce(Vector3.up * upForce);
+        var upForce = 1 - Mathf.Clamp(BlimpBody.transform.position.y / EffectiveHeight, 0, 1);
+        upForce = Mathf.Lerp(0f, EngineForce, upForce) * BlimpBody.mass;
+        BlimpBody.AddRelativeForce(Vector3.up * upForce);
     }
 
     private void TiltProcess()
     {
         hTilt.x = Mathf.Lerp(hTilt.x, hMove.x * TurnTiltForce, Time.deltaTime);
         hTilt.y = Mathf.Lerp(hTilt.y, hMove.y * ForwardTiltForce, Time.deltaTime);
-        HelicopterModel.transform.localRotation = Quaternion.Euler(hTilt.y, HelicopterModel.transform.localEulerAngles.y, -hTilt.x);
+        BlimpBody.transform.localRotation = Quaternion.Euler(hTilt.y, BlimpBody.transform.localEulerAngles.y, -hTilt.x);
     }
 
     private void OnKeyPressed(PressedKeyCode[] obj)
@@ -144,16 +144,16 @@ public class BlimpController : MonoBehaviour
                     case PressedKeyCode.TurnRightPressed:
                     {
                         if (IsOnGround()) break;
-                        var force = (turnForcePercent - Mathf.Abs(hMove.y))*HelicopterModel.mass;
-                        HelicopterModel.AddRelativeTorque(0f, force, 0);
+                        var force = (turnForcePercent - Mathf.Abs(hMove.y))*BlimpBody.mass;
+                        BlimpBody.AddRelativeTorque(0f, force, 0);
                     }
                     break;
                     case PressedKeyCode.TurnLeftPressed:
                     {
                         if (IsOnGround()) break;
                         
-                        var force = -(turnForcePercent - Mathf.Abs(hMove.y))*HelicopterModel.mass;
-                        HelicopterModel.AddRelativeTorque(0f, force, 0);
+                        var force = -(turnForcePercent - Mathf.Abs(hMove.y))*BlimpBody.mass;
+                        BlimpBody.AddRelativeTorque(0f, force, 0);
                     }
                     break;
 
@@ -175,6 +175,9 @@ public class BlimpController : MonoBehaviour
             return true;
         }
 
+        return false;
+
+        /*
         int landed = 0;
         foreach (LandingTrigger trigger in landingTriggers)
         {
@@ -184,16 +187,24 @@ public class BlimpController : MonoBehaviour
             }
         }
         return landed > 1;
+        */
     }
 
-    public void BreakDown()
+    public void FullStop()
     {
-        EngineForce = 0;
         engineForceMax = 0;
+        engineForceMin = 0;
+        EngineForce = 0;
+        BlimpBody.isKinematic = true;
     }
 
     public void SetEngineForceMin(float engineForceMin)
     {
+        if (engineForceMin > engineForceMax)
+        {
+            return;
+        }
+
         this.engineForceMin = engineForceMin;
         if (EngineForce < engineForceMin)
         {

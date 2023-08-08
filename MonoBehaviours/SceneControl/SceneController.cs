@@ -8,7 +8,7 @@ using KopliSoft.Behaviour;
 
 namespace KopliSoft.SceneControl
 {
-    public class SceneController : MonoBehaviour
+    public class SceneController : MonoBehaviour, IDataPersistence
     {
         public event Action BeforeSceneUnload;          // Event delegate that is called just before a scene is unloaded.
         public event Action AfterSceneLoad;             // Event delegate that is called just after a scene is loaded.
@@ -19,10 +19,11 @@ namespace KopliSoft.SceneControl
 
         public Flowchart chapterInfo;
 
+        //Those objects are initially hidden, so their persistance is managed by this class
         [SerializeField]
-        private PatrolController[] mainCharacters;
+        private GameObject protagonist;
         [SerializeField]
-        private GameObject vault;
+        private GameObject airship;
 
         private enum SceneState {NONE, TO_LOAD, TO_UNLOAD, LOADING, UNLOADING, LOADED};
         private Dictionary<string, SceneState> seamleassScenes = new Dictionary<string, SceneState>();
@@ -60,23 +61,25 @@ namespace KopliSoft.SceneControl
 
             StartFade(0f, this.fadeDuration);
         }
- 
-        private void MoveCharactersToVault()
+
+        public void LoadData(GameData data)
         {
-            foreach (PatrolController character in mainCharacters)
-            {
-                if (character.gameObject.activeInHierarchy)
-                {
-                    character.TeleportToWaypoint(vault);
-                }
-                else
-                {
-                    character.transform.position = vault.transform.position;
-                    character.transform.rotation = vault.transform.rotation;
-                }
-            }
+            protagonist.transform.position = data.playerPosition;
+            protagonist.transform.rotation = data.playerRotation;
+
+            airship.transform.position = data.airshipPosition;
+            airship.transform.rotation = data.airshipRotation;
+
         }
- 
+
+        public void SaveData(ref GameData data)
+        {
+            data.playerPosition = protagonist.transform.position;
+            data.playerRotation = protagonist.transform.rotation;
+
+            data.airshipPosition = airship.transform.position;
+            data.airshipRotation = airship.transform.rotation;
+        }
 
         private IEnumerator LoadScenes(string[] sceneNames)
         {

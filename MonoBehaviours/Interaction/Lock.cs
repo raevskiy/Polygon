@@ -32,6 +32,15 @@ namespace KopliSoft.Interaction
             }
         }
 
+        private void OnTriggerExit(Collider other)
+        {
+            if (other == keyHolder)
+            {
+                StartCoroutine(LockDoorWhenItIsClosed());
+                keyHolder = null;
+            }
+        }
+
         private bool IsCharacter(Collider collider)
         {
             LayerMask layermask = LayerMask.GetMask(new string[] { "Player" });
@@ -57,15 +66,6 @@ namespace KopliSoft.Interaction
                 }
             }
             return false;
-        }
-
-        private void OnTriggerExit(Collider other)
-        {
-            if (other == keyHolder)
-            {
-                StartCoroutine(LockDoorWhenItIsClosed());
-                keyHolder = null;
-            }
         }
 
         IEnumerator LockDoorWhenItIsClosed()
