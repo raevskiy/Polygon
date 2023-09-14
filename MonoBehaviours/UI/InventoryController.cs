@@ -9,8 +9,9 @@ namespace KopliSoft.Inventory
         public GameObject inventory;
         public GameObject characterSystem;
         public GameObject craftSystem;
+        [SerializeField]
+        private GameObject protagonist;
 
-        private CharacterSwitch characterSwitch;
         private Inventory craftSystemInventory;
         private CraftSystem cS;
         private Inventory mainInventory;
@@ -55,7 +56,6 @@ namespace KopliSoft.Inventory
                 characterSystemInventory = characterSystem.GetComponent<Inventory>();
             if (craftSystem != null)
                 craftSystemInventory = craftSystem.GetComponent<Inventory>();
-            characterSwitch = FindObjectOfType<CharacterSwitch>();
         }
 
         public void OnEnable()
@@ -174,15 +174,13 @@ namespace KopliSoft.Inventory
                     GameObject dropItem = Instantiate(mainInventory.ItemsInInventory[i].itemModel);
                     dropItem.AddComponent<PickUpItem>();
                     dropItem.GetComponent<PickUpItem>().item = mainInventory.ItemsInInventory[i];
-                    dropItem.transform.localPosition = characterSwitch.GetCurrentCharacter().transform.localPosition;
+                    dropItem.transform.localPosition = protagonist.transform.localPosition;
                 }
             }
         }
 
         public bool OnConsumeItem(Item item)
         {
-            GameObject currentCharacter = characterSwitch.GetCurrentCharacter();
-
             foreach (ItemAttribute attribute in item.itemAttributes)
             {
                 if ("Health".Equals(attribute.attributeName))
@@ -208,7 +206,7 @@ namespace KopliSoft.Inventory
                 }
                 else if ("ShotgunAmmo".Equals(attribute.attributeName))
                 {
-                    Opsive.ThirdPersonController.Wrappers.Inventory opsiveInventory = currentCharacter.GetComponent<Opsive.ThirdPersonController.Wrappers.Inventory>();
+                    Opsive.ThirdPersonController.Wrappers.Inventory opsiveInventory = protagonist.GetComponent<Opsive.ThirdPersonController.Wrappers.Inventory>();
                     if (opsiveInventory.HasItem(1650912923))
                     {
                         opsiveInventory.PickupItem(1548588025, attribute.attributeValue, false, false);
@@ -224,11 +222,11 @@ namespace KopliSoft.Inventory
             GameObject flowchartGameObject = GameObject.Find("/Story/Flowcharts/Items/item" + item.itemID);
             if (flowchartGameObject != null)
             {
-                currentCharacter.GetComponentInChildren<StorageInventory>().CloseStorage();
+                protagonist.GetComponentInChildren<StorageInventory>().CloseStorage();
                 Fungus.Flowchart flowchart = flowchartGameObject.GetComponent<Fungus.Flowchart>();
                 if (flowchart.HasVariable("Interviewer"))
                 {
-                    flowchart.SetStringVariable("Interviewer", currentCharacter.tag);
+                    flowchart.SetStringVariable("Interviewer", protagonist.tag);
                 }
 
                 flowchart.ExecuteBlock("Start");
@@ -306,7 +304,7 @@ namespace KopliSoft.Inventory
 
             if (inventory != null && Input.GetKeyDown(inputManagerDatabase.InventoryKeyCode))
             {
-                characterSwitch.GetCurrentCharacter().GetComponentInChildren<StorageInventory>().ToggleStorage();
+                protagonist.GetComponentInChildren<StorageInventory>().ToggleStorage();
             }
 
             if (craftSystem != null && Input.GetKeyDown(inputManagerDatabase.CraftSystemKeyCode))

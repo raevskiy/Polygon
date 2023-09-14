@@ -33,7 +33,7 @@ namespace KopliSoft.Interaction
 
         protected virtual void OnTriggerEnter(Collider other)
         {
-            if (Utility.InLayerMask(other.gameObject.layer, m_InteractorLayer.value))
+            if (!enabled && Utility.InLayerMask(other.gameObject.layer, m_InteractorLayer.value))
             {
                 m_Interactor = other.transform;
                 m_InteractorGameObject = other.gameObject;
@@ -44,7 +44,7 @@ namespace KopliSoft.Interaction
 
         protected virtual void OnTriggerExit(Collider other)
         {
-            if (other.transform.Equals(m_Interactor))
+            if (enabled && other.transform.Equals(m_Interactor))
             {
                 EventHandler.ExecuteEvent<IInteractable>(m_Interactor.gameObject, "OnInteractableHasInteractable", null);
                 m_Interactor = null;

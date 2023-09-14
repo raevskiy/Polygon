@@ -85,12 +85,15 @@ namespace KopliSoft.Interaction
 
         IEnumerator CheckFacingInterviewer()
         {
+            var stoppingDistance = navMeshAgent.stoppingDistance;
+            navMeshAgent.stoppingDistance = 0;
             Vector3 dir = Vector3.ProjectOnPlane(m_InteractorGameObject.transform.position - navMeshAgent.transform.position, Vector3.up).normalized;
             while (Vector3.Dot(navMeshAgent.transform.forward, dir) < 0.9f)
             {
                 yield return new WaitForSeconds(.1f);
             }
             navMeshAgent.isStopped = true;
+            navMeshAgent.stoppingDistance = stoppingDistance;
         }
 
         void OnBlockEnd(Fungus.Block block)
