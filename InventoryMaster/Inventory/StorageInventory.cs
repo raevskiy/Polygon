@@ -11,12 +11,9 @@ using Fungus;
 
 namespace KopliSoft.Inventory
 {
-    public class StorageInventory : MonoBehaviour
+    public class StorageInventory : MonoBehaviour, IDataPersistence
     {
         public Inventory inventory;
-
-        [SerializeField]
-        private string inventoryPath;
 
         [SerializeField]
         private string inventoryName;
@@ -47,11 +44,6 @@ namespace KopliSoft.Inventory
         {
             if (inputManagerDatabase == null)
                 inputManagerDatabase = (InputManager)Resources.Load("InputManager");
-
-            if (inventory == null)
-            {
-                inventory = SceneGraphSearch.Find(inventoryPath).GetComponent<Inventory>();
-            }
 
             if (flowchartPath.Length > 0)
             {
@@ -95,15 +87,20 @@ namespace KopliSoft.Inventory
 
         public void AddItemToStorage(int id, int value)
         {
-            Item item = itemDatabase.getItemByID(id);
-            item.itemValue = value;
-            storageItems.Add(item);
+            DoAddItemToStorage(id, value);
 
             if (inventoryName != null && flowchart != null)
             {
                 string blockName = inventoryName + id + "Added";
                 InformFlowchart(blockName);
             }
+        }
+
+        private void DoAddItemToStorage(int id, int quantity)
+        {
+            Item item = itemDatabase.getItemByID(id);
+            item.itemValue = quantity;
+            storageItems.Add(item);
         }
 
         public void RemoveItemFromStorage(int id, int value)
@@ -230,6 +227,25 @@ namespace KopliSoft.Inventory
                 inventory.addItemToInventory(storageItem.itemID, storageItem.itemValue);
             }
             inventory.stackableSettings();
+        }
+
+        public void LoadData(GameData data)
+        {
+            List<StorageItemData> storageItemData = data.storageItems.GetValueOrDefault(inventoryName, new List<StorageItemData>());
+            foreach (StorageItemData storageItemDatum in storageItemData)
+            {
+                DoAddItemToStorage(storageItemDatum.id, storageItemDatum.quantity);
+            }
+        }
+
+        public void SaveData(ref GameData data)
+        {
+            List<StorageItemData> storageItemData = new List<StorageItemData>();
+            foreach (Item item in storageItems)
+            {
+                storageItemData.Add(new StorageItemData(item.itemID, item.itemValue));
+            }
+            data.storageItems.Add(inventoryName, storageItemData);
         }
     }
 

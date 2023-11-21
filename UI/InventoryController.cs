@@ -11,6 +11,8 @@ namespace KopliSoft.Inventory
         public GameObject craftSystem;
         [SerializeField]
         private GameObject protagonist;
+        [SerializeField]
+        private StorageInventory storageForProtagonist;
 
         private Inventory craftSystemInventory;
         private CraftSystem cS;
@@ -222,7 +224,7 @@ namespace KopliSoft.Inventory
             GameObject flowchartGameObject = GameObject.Find("/Story/Flowcharts/Items/item" + item.itemID);
             if (flowchartGameObject != null)
             {
-                protagonist.GetComponentInChildren<StorageInventory>().CloseStorage();
+                storageForProtagonist.CloseStorage();
                 Fungus.Flowchart flowchart = flowchartGameObject.GetComponent<Fungus.Flowchart>();
                 if (flowchart.HasVariable("Interviewer"))
                 {
@@ -304,7 +306,7 @@ namespace KopliSoft.Inventory
 
             if (inventory != null && Input.GetKeyDown(inputManagerDatabase.InventoryKeyCode))
             {
-                protagonist.GetComponentInChildren<StorageInventory>().ToggleStorage();
+                storageForProtagonist.ToggleStorage();
             }
 
             if (craftSystem != null && Input.GetKeyDown(inputManagerDatabase.CraftSystemKeyCode))

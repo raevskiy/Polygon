@@ -13,17 +13,16 @@ namespace KopliSoft.UI
         private string[] commands;
         [SerializeField]
         private int[] itemIds;
+        [SerializeField]
+        private StorageInventory storageForProtagonist;
 
         private Dictionary<string, int> commandToItemId = new Dictionary<string, int>();
         private string commandName;
-        private CharacterSwitch characterSwitch;
-
 
         // Start is called before the first frame update
         void Start()
         {
             BlockSignals.OnCommandExecute += OnCommandExecute;
-            characterSwitch = FindObjectOfType<CharacterSwitch>();
             for (int i = 0; i < commands.Length; i++)
             {
                 commandToItemId.Add(commands[i], itemIds[i]);
@@ -42,12 +41,11 @@ namespace KopliSoft.UI
 
         public void CreateNote()
         {
-            StorageInventory destinationStorage = characterSwitch.GetCurrentCharacter().GetComponentInChildren<StorageInventory>();
             int itemId;
             commandToItemId.TryGetValue(commandName, out itemId);
-            if (destinationStorage.FindItemById(itemId) == null)
+            if (storageForProtagonist.FindItemById(itemId) == null)
             {
-                destinationStorage.AddItemToStorage(itemId, 1);
+                storageForProtagonist.AddItemToStorage(itemId, 1);
                 writeDownButton.SetActive(false);
             }
         }

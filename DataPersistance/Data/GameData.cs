@@ -11,6 +11,7 @@ public class GameData
     public Vector3 airshipPosition;
     public Quaternion airshipRotation;
 
+    public Dictionary<string, List<StorageItemData>> storageItems;
     public GameData()
     {
         playerPosition = new Vector3(870.689f, 63.777f, 819.854f);
@@ -18,6 +19,8 @@ public class GameData
 
         airshipPosition = new Vector3(878.299988f, 75.5f, 840f);
         airshipRotation = Quaternion.Euler(0, 200f, 0);
+
+        storageItems = new Dictionary<string, List<StorageItemData>>();
 
     }
 }
