@@ -231,7 +231,7 @@ namespace KopliSoft.Inventory
 
         public void LoadData(GameData data)
         {
-            List<StorageItemData> storageItemData = data.storageItems.GetValueOrDefault(inventoryName, new List<StorageItemData>());
+            StorageItemData[] storageItemData = data.storageItems.GetValueOrDefault(inventoryName, new StorageItemData[0]);
             foreach (StorageItemData storageItemDatum in storageItemData)
             {
                 DoAddItemToStorage(storageItemDatum.id, storageItemDatum.quantity);
@@ -240,10 +240,12 @@ namespace KopliSoft.Inventory
 
         public void SaveData(ref GameData data)
         {
-            List<StorageItemData> storageItemData = new List<StorageItemData>();
+            StorageItemData[] storageItemData = new StorageItemData[storageItems.Count];
+            int i = 0;
             foreach (Item item in storageItems)
             {
-                storageItemData.Add(new StorageItemData(item.itemID, item.itemValue));
+                storageItemData[i] = new StorageItemData(item.itemID, item.itemValue);
+                i++;
             }
             data.storageItems.Add(inventoryName, storageItemData);
         }
