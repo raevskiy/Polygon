@@ -13,6 +13,8 @@ public class GameData
 
     public Dictionary<string, StorageItemData[]> storageItems;
 
+    public float timeOfDay;
+
     public GameData()
     {
         playerPosition = new Vector3(870.689f, 63.777f, 819.854f);
@@ -23,5 +25,6 @@ public class GameData
 
         storageItems = new Dictionary<string, StorageItemData[]>();
 
+        timeOfDay = 18;
     }
 }
