@@ -2,6 +2,7 @@
 using UnityEngine;
 using KopliSoft.Inventory;
 using KopliSoft.Interaction;
+using KopliSoft.Dialogue;
 
 namespace KopliSoft.UI
 {
@@ -26,6 +27,8 @@ namespace KopliSoft.UI
             ShowPanels.PanelClosedEvent += DecreaseAllCounters;
             BlimpOnboarding.EnterVehicleEvent += IncreaseInputCounter;
             BlimpOnboarding.ExitVehicleEvent += DecreaseInputCounter;
+            ModalUI.Opened += OnModalOpened;
+            ModalUI.Closed += OnModalClosed;
         }
 
         private void OnDestroy()
@@ -36,6 +39,21 @@ namespace KopliSoft.UI
             Inventory.Inventory.InventoryClose -= InventoryClosed;
             ShowPanels.PanelOpenedEvent -= IncreaseAllCounters;
             ShowPanels.PanelClosedEvent -= DecreaseAllCounters;
+            ModalUI.Opened -= OnModalOpened;
+            ModalUI.Closed -= OnModalClosed;
+        }
+
+        // Ink dialogues and the notebook behave like a Fungus dialog block.
+        private void OnModalOpened()
+        {
+            IncreaseAllCounters();
+            inventoryConroller.BlockInventoryUI();
+        }
+
+        private void OnModalClosed()
+        {
+            DecreaseAllCounters();
+            inventoryConroller.UnblockInventoryUI();
         }
 
         private void InventoryOpened()

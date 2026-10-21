@@ -100,7 +100,10 @@ namespace KopliSoft.Inventory
         {
             Item item = itemDatabase.getItemByID(id);
             item.itemValue = quantity;
-            storageItems.Add(item);
+            if (!storageItems.Contains(item))
+            {
+                storageItems.Add(item);
+            }
         }
 
         public void RemoveItemFromStorage(int id, int value)
@@ -247,6 +250,7 @@ namespace KopliSoft.Inventory
                 storageItemData[i] = new StorageItemData(item.itemID, item.itemValue);
                 i++;
             }
+            data.storageItems.Remove(inventoryName);
             data.storageItems.Add(inventoryName, storageItemData);
         }
     }

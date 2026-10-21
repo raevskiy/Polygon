@@ -15,6 +15,11 @@ public class GameData
 
     public float timeOfDay;
 
+    // Notes, conclusions and tasks of the current chapter.
+    public KopliSoft.Investigation.CaseFileState investigation;
+    // Ink story state (visit counts, variables) as ink's own JSON.
+    public string inkState;
+
     public GameData()
     {
         playerPosition = new Vector3(870.689f, 63.777f, 819.854f);

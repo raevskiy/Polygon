@@ -8,12 +8,6 @@ namespace KopliSoft.SceneControl
 {
     public class ChangeOfScenery : MonoBehaviour
     {
-        [SerializeField]
-        private float fadeInDuration = 1f;
-        [SerializeField]
-        private float fadeOutDuration = 1f;
-        [SerializeField]
-        private float pauseDuration = 0;
 
         [SerializeField]
         private string sceneToLoad;
@@ -21,43 +15,37 @@ namespace KopliSoft.SceneControl
         private string sceneToUnload;
 
         [SerializeField]
-        private string[] objectsToDeactivate;
+        private GameObject[] objectsToDeactivate;
         [SerializeField]
-        private string[] objectsToActivate;
+        private GameObject[] objectsToActivate;
         [SerializeField]
-        private string[] charactersToTeleport;
+        private GameObject[] charactersToTeleport;
         [SerializeField]
         private GameObject[] teleports;
         [SerializeField]
         private float time = -1f;
         [SerializeField]
-        private bool switchOnStart;
+        private Fungus.Flowchart flowchart;
+
+
         [SerializeField]
         private bool switchOnTriggerEnter;
         [SerializeField]
         private LayerMask triggerLayerMask = (1 << LayerManager.Enemy) | (1 << LayerManager.Player);
 
-
         private SceneController sceneController;
         private LSkyTOD timeOfDay;
         private GameObject collidedGameObject;
-
-        private bool inProgress;
 
         void Start()
         {
             sceneController = FindObjectOfType<SceneController>();
             timeOfDay = FindObjectOfType<LSkyTOD>();
-
-            if (switchOnStart)
-            {
-                Switch();
-            }
         }
 
         private void OnTriggerEnter(Collider other)
         {
-            if (!inProgress && switchOnTriggerEnter && triggerLayerMask == (triggerLayerMask | (1 << other.gameObject.layer)) )
+            if (switchOnTriggerEnter && triggerLayerMask == (triggerLayerMask | (1 << other.gameObject.layer)))
             {
                 collidedGameObject = other.gameObject;
                 Switch();
@@ -66,41 +54,10 @@ namespace KopliSoft.SceneControl
 
         public void Switch()
         {
-            if (!inProgress)
+            if (flowchart != null)
             {
-                inProgress = true;
-
-                if (fadeInDuration >= 0 && fadeInDuration < 0.1f)
-                {
-                    sceneController.faderCanvasGroup.alpha = 1.0f;
-                }
-                StartCoroutine(FadeAndSwitch());
+                flowchart.ExecuteBlock("Before");
             }
-        }
-
-        private IEnumerator FadeAndSwitch()
-        {
-            if (fadeInDuration >= 0.1f)
-            {
-                yield return StartCoroutine(sceneController.Fade(1f, fadeInDuration));
-            }
-
-            ChangeScenery();
-            if (pauseDuration > 0)
-            {
-                yield return StartCoroutine(Pause());
-            }
-
-            if (fadeOutDuration >= 0)
-            {
-                yield return StartCoroutine(sceneController.Fade(0f, fadeOutDuration));
-            }
-
-            inProgress = false;
-        }
-
-        private void ChangeScenery()
-        {
             if (time >= 0)
             {
                 timeOfDay.SetTime(time);
@@ -109,6 +66,10 @@ namespace KopliSoft.SceneControl
             Deactivate();
             Activate();
             Teleport();
+            if (flowchart != null)
+            {
+                flowchart.ExecuteBlock("After");
+            }
         }
 
         private void Deactivate()
@@ -118,9 +79,8 @@ namespace KopliSoft.SceneControl
                 sceneController.RemoveSeamlessScene(sceneToUnload);
             }
 
-            foreach (string objectName in objectsToDeactivate)
+            foreach (GameObject gameObject in objectsToDeactivate)
             {
-                GameObject gameObject = SceneGraphSearch.Find(objectName);
                 if (gameObject != null)
                 {
                     SeamlessSceneLoader loader = gameObject.GetComponentInChildren<SeamlessSceneLoader>();
@@ -141,9 +101,8 @@ namespace KopliSoft.SceneControl
                 sceneController.AddSeamlessScene(sceneToLoad);
             }
 
-            foreach (string objectName in objectsToActivate)
+            foreach (GameObject gameObject in objectsToActivate)
             {
-                GameObject gameObject = SceneGraphSearch.Find(objectName);
                 if (gameObject != null)
                 {
                     gameObject.SetActive(true);
@@ -161,8 +120,7 @@ namespace KopliSoft.SceneControl
             {
                 for (int i = 0; i < charactersToTeleport.Length; i++)
                 {
-                    GameObject character = SceneGraphSearch.Find(charactersToTeleport[i]);
-                    Teleport(character, teleports[i]);
+                    Teleport(charactersToTeleport[i], teleports[i]);
                 }
             }
         }
@@ -180,16 +138,5 @@ namespace KopliSoft.SceneControl
                 character.transform.rotation = teleport.transform.rotation;
             }
         }
-
-        private IEnumerator Pause()
-        {
-            float time = 0;
-            while (time < pauseDuration)
-            {
-                time += Time.deltaTime;
-                yield return null;
-            }
-        }
-
     }
 }

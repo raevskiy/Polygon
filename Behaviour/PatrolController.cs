@@ -150,6 +150,11 @@ namespace KopliSoft.Behaviour
             navMeshAgent.Warp(waypoint.transform.position);
         }
 
+        public void Teleport(GameObject waypoint)
+        {
+            navMeshAgent.Warp(waypoint.transform.position);
+        }
+
         private void FollowPlan(List<GameObject> plan)
         {
             DisableBehavior();

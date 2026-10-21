@@ -1,0 +1,26 @@
+{
+    "name": "KopliSoft.Investigation.Tests",
+    "rootNamespace": "KopliSoft.Investigation.Tests",
+    "references": [
+        "KopliSoft.Investigation",
+        "Ink-Libraries",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

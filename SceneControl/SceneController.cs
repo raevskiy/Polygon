@@ -13,10 +13,6 @@ namespace KopliSoft.SceneControl
         public event Action BeforeSceneUnload;          // Event delegate that is called just before a scene is unloaded.
         public event Action AfterSceneLoad;             // Event delegate that is called just after a scene is loaded.
 
-        public CanvasGroup faderCanvasGroup;            // The CanvasGroup that controls the Image used for fading to black.
-        public float fadeDuration = 1f;                 // How long it should take to fade to and from black.
-        private bool isFading;
-
         public Flowchart chapterInfo;
 
         //Those objects are initially hidden, so their persistance is managed by this class
@@ -31,35 +27,7 @@ namespace KopliSoft.SceneControl
         private void Start()
         {
             Application.backgroundLoadingPriority = ThreadPriority.Low;
-            faderCanvasGroup.alpha = 1f;
             StartCoroutine(SeamlessSceneDaemon(2));
-        }
-
-        public void FadeAndSwitchScenes(string sceneNamesToLoad, string sceneNamesToUnload)
-        {
-            FadeAndSwitchScenes(sceneNamesToLoad.Split(','), sceneNamesToUnload.Split(','));
-        }
-
-        public void FadeAndSwitchScenes(string[] sceneNamesToLoad, string[] sceneNamesToUnload)
-        {
-            if (!isFading)
-            {
-                StartCoroutine(DoFadeAndSwitchScenes(sceneNamesToLoad, sceneNamesToUnload));
-            }
-        }
-
-        private IEnumerator DoFadeAndSwitchScenes(string[] sceneNamesToLoad, string[] sceneNamesToUnload)
-        {
-            yield return StartCoroutine(Fade(1f, this.fadeDuration));
-
-            BeforeSceneUnload?.Invoke();
- 
-            yield return StartCoroutine(UnloadScenes(sceneNamesToUnload));
-            yield return StartCoroutine(LoadScenes(sceneNamesToLoad));
-
-            AfterSceneLoad?.Invoke();
-
-            StartFade(0f, this.fadeDuration);
         }
 
         public void LoadData(GameData data)
@@ -94,39 +62,6 @@ namespace KopliSoft.SceneControl
             foreach (string sceneName in sceneNames)
             {
                 yield return SceneManager.UnloadSceneAsync(sceneName);
-            }
-        }
-
-        public void StartFade(float finalAlpha, float fadeDuration)
-        {
-            StartCoroutine(Fade(finalAlpha, fadeDuration));
-        }
-
-        public IEnumerator Fade(float finalAlpha, float fadeDuration)
-        {
-            if (fadeDuration < 0.1)
-            {
-                faderCanvasGroup.alpha = finalAlpha;
-            }
-            else
-            {
-                // FadeAndSwitchScenes coroutine won't be called again.
-                isFading = true;
-                // no more input can be accepted.
-                faderCanvasGroup.blocksRaycasts = true;
-                float fadeSpeed = Mathf.Abs(faderCanvasGroup.alpha - finalAlpha) / fadeDuration;
-                while (!Mathf.Approximately(faderCanvasGroup.alpha, finalAlpha))
-                {
-                    faderCanvasGroup.alpha = Mathf.MoveTowards(
-                        faderCanvasGroup.alpha,
-                        finalAlpha,
-                        fadeSpeed * Time.deltaTime);
-                    yield return null;
-                }
-
-                isFading = false;
-                // input is no longer ignored.
-                faderCanvasGroup.blocksRaycasts = false;
             }
         }
 
