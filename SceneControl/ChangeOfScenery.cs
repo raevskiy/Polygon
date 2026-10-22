@@ -127,6 +127,13 @@ namespace KopliSoft.SceneControl
 
         private void Teleport(GameObject character, GameObject teleport)
         {
+            // An empty slot used to throw a NullReferenceException that Fungus' InvokeMethod reported without any context.
+            if (character == null || teleport == null)
+            {
+                Debug.LogError(name + ": ChangeOfScenery has an empty " + (character == null ? "Characters To Teleport" : "Teleports") +
+                    " slot, nothing is teleported", this);
+                return;
+            }
             PatrolController patrolController = character.GetComponent<PatrolController>();
             if (patrolController != null && patrolController.enabled)
             {

@@ -6,9 +6,9 @@ using NUnit.Framework;
 namespace KopliSoft.Investigation.Tests
 {
     /// <summary>
-    /// Plays Yuri's conversation (ported from the Fungus flowchart "Flying Club Master") with a fake Fungus side.
+    /// Plays the Flying Club master's conversation (ported from the Fungus flowchart "Flying Club Master") with a fake Fungus side.
     /// </summary>
-    public class YuriDialogueTests
+    public class FlyingClubMasterDialogueTests
     {
         private Story story;
         private CaseFile caseFile;
@@ -36,7 +36,7 @@ namespace KopliSoft.Investigation.Tests
                 return (object)(fungus.TryGetValue(flowchart + "." + variable, out value) && value);
             }, true);
             story.BindExternalFunction("fungus_set_bool", (string flowchart, string variable, bool value) => { fungus[flowchart + "." + variable] = value; });
-            story.BindExternalFunction("fungus_message", (string message) => { messages.Add(message); });
+            story.BindExternalFunction("airship_event", (string name) => { messages.Add(name); });
             story.BindExternalFunction("set_active", (string path, bool active) => { if (active) activated.Add(path); });
             session = new DialogueSession(story, definition);
         }
@@ -73,31 +73,31 @@ namespace KopliSoft.Investigation.Tests
             return step.Choices;
         }
 
-        private void MeetYuri()
+        private void FirstMeeting()
         {
-            session.Begin("yuri");
+            session.Begin("flying_club_master");
             Play("Improvising");
         }
 
         [Test]
         public void FirstMeetingIntroducesTheClubAndEnds()
         {
-            session.Begin("yuri");
-            var lines = Play("We are here to help resolving the crysis.", "Between the capitalists and the proletariat?", "The proletariat becomes the new capitalists.");
+            session.Begin("flying_club_master");
+            var lines = Play("We are here to help resolve the crisis.", "Between the capitalists and the proletariat?", "The proletariat becomes the new capitalists.");
 
             Assert.AreEqual("Anna", lines[0].SpeakerName);
             Assert.AreEqual("Yuri", lines[1].SpeakerName);
             Assert.AreEqual("Your inner voice", lines[2].SpeakerName);
-            Assert.That(lines.Last().Text, Does.StartWith("Good, sorry for off topic."));
-            Assert.AreEqual(2, (int)story.variablesState["yuri_reputation"]);
-            Assert.IsTrue((bool)story.variablesState["yuri_intro_done"]);
+            Assert.That(lines.Last().Text, Does.Contain("Flying Club"));
+            Assert.AreEqual(2, (int)story.variablesState["flying_club_master_reputation"]);
+            Assert.IsTrue((bool)story.variablesState["flying_club_master_intro_done"]);
         }
 
         [Test]
         public void LaterTalksGoStraightToQuestions()
         {
-            MeetYuri();
-            session.Begin("yuri");
+            FirstMeeting();
+            session.Begin("flying_club_master");
             var lines = Play();
             Assert.AreEqual("Hi Anna. How may I help you?", lines.Single().Text);
             CollectionAssert.AreEqual(new[] { "No questions", "Questions about airplanes", "Questions about the current situation" }, CurrentChoices());
@@ -106,30 +106,29 @@ namespace KopliSoft.Investigation.Tests
         [Test]
         public void CurrentSituationOffersTheFourNotesAndThePermission()
         {
-            MeetYuri();
-            session.Begin("yuri");
-            var lines = Play("Questions about the current situation", "What do you know about the strike",
+            FirstMeeting();
+            session.Begin("flying_club_master");
+            var lines = Play("Questions about the current situation", "What do you know about the strike?",
                 "Has anything unusual happened here, at the airfield?", "Anything unusual in the neighbourhood?");
 
-            CollectionAssert.AreEqual(new[] { "yuri_strike", "yuri_airfield_activity", "yuri_foreign_visitors", "yuri_army" },
+            CollectionAssert.AreEqual(new[] { "flying_club_master_strike", "flying_club_master_airfield_activity", "flying_club_master_foreign_visitors", "flying_club_master_army" },
                 lines.Where(l => l.NoteId != null).Select(l => l.NoteId));
-            Assert.IsTrue(fungus["Flight log.readPermission"]);
+            Assert.IsTrue((bool)story.variablesState["flight_log_read_permission"]);
         }
 
         [Test]
         public void FirstGoodbyeSendsAnnaToBedOnce()
         {
-            MeetYuri();
-            session.Begin("yuri");
+            FirstMeeting();
+            session.Begin("flying_club_master");
             var lines = Play("No questions");
             // "Hi Anna...", "See you.", then the captain and the narrator.
             Assert.AreEqual("See you.", lines[1].Text);
             Assert.AreEqual("Captain J. Meister", lines[2].SpeakerName);
             Assert.That(lines[3].Text, Does.StartWith("<You have a bed"));
-            CollectionAssert.AreEqual(new[] { "TalkingToCapUnlocked" }, messages);
-            CollectionAssert.AreEqual(new[] { "/NPC/Cap/Dialog" }, activated);
+            CollectionAssert.AreEqual(new[] { "unlock_captain" }, messages);
 
-            session.Begin("yuri");
+            session.Begin("flying_club_master");
             lines = Play("No questions");
             Assert.AreEqual("See you.", lines.Last().Text);
             Assert.AreEqual(1, messages.Count);
@@ -138,13 +137,13 @@ namespace KopliSoft.Investigation.Tests
         [Test]
         public void AirplaneTopicsDependOnWhatAnnaExamined()
         {
-            MeetYuri();
-            session.Begin("yuri");
+            FirstMeeting();
+            session.Begin("flying_club_master");
             Play("Questions about airplanes");
             Assert.AreEqual(3, CurrentChoices().Count);
 
-            fungus["Sopwith Airplane.Examined"] = true;
-            session.Begin("yuri");
+            story.variablesState["airplane_british_examined"] = true;
+            session.Begin("flying_club_master");
             var lines = Play("Questions about airplanes", "I've seen a damaged British airplane of the Great War on the airfield");
             Assert.That(lines.Last().Text, Does.Contain("fuel line was clogged"));
             Assert.IsTrue(fungus["Flying Club Master.AirplaneCrashDiscussed"]);
@@ -154,12 +153,12 @@ namespace KopliSoft.Investigation.Tests
         public void ShortFlightNeedsTheConclusionAndRespectsReputation()
         {
             // Rude first meeting: reputation -1.
-            session.Begin("yuri");
+            session.Begin("flying_club_master");
             Play("Right now, we are the law *here*.");
-            fungus["Flight log.discovered"] = true;
-            fungus["Flight log.readPermission"] = true;
+            story.variablesState["flight_log_discovered"] = true;
+            story.variablesState["flight_log_read_permission"] = true;
 
-            session.Begin("yuri");
+            session.Begin("flying_club_master");
             Play("Questions about the flight log");
             CollectionAssert.AreEqual(new[] { "<Ask something else>" }, CurrentChoices());
 
@@ -170,10 +169,10 @@ namespace KopliSoft.Investigation.Tests
             Assert.AreEqual(CombineOutcome.NewConclusion, caseFile.Combine(new[] { "log_1937_03", "log_1937_05", "log_1937_06", "log_1937_07" }, Relation.Match).Outcome);
 
             // "Last" first: Yuri corrects Anna and keeps the short answer (reputation still -1).
-            session.Begin("yuri");
+            session.Begin("flying_club_master");
             var lines = Play("Questions about the flight log", "The last flight of the trimotor was a short one.");
             Assert.AreEqual("The most recent flight, not the last!", lines[1].Text);
-            Assert.AreEqual("He lost the Pitot tube, but managed to return and to land.", lines[2].Text);
+            Assert.AreEqual("He lost the Pitot tube, but managed to return and land.", lines[2].Text);
             Assert.IsTrue(fungus["Flying Club Master.PitotTubeDiscussed"]);
             // Corrected once, the wrong wording is not offered again.
             CollectionAssert.AreEqual(new[] { "The most recent flight of the trimotor was a short one.", "<Ask something else>" }, CurrentChoices());
@@ -182,15 +181,15 @@ namespace KopliSoft.Investigation.Tests
         [Test]
         public void SayingMostRecentRightAwayEarnsTheFullAnswer()
         {
-            session.Begin("yuri");
+            session.Begin("flying_club_master");
             Play("Right now, we are the law *here*.");
-            fungus["Flight log.discovered"] = true;
+            story.variablesState["flight_log_discovered"] = true;
             fungus["item13.InvestigateShortFlight"] = true;
 
-            session.Begin("yuri");
+            session.Begin("flying_club_master");
             var lines = Play("Questions about the flight log", "The most recent flight of the trimotor was a short one.");
             Assert.AreEqual("Yes, it went wrong.", lines[1].Text);
-            Assert.AreEqual(0, (int)story.variablesState["yuri_reputation"]);
+            Assert.AreEqual(0, (int)story.variablesState["flying_club_master_reputation"]);
         }
     }
 }

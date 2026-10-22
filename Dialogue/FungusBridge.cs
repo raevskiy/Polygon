@@ -18,12 +18,38 @@ namespace KopliSoft.Dialogue
             story.BindExternalFunction("fungus_bool", (string flowchart, string variable) => (object)GetBool(flowchart, variable), true);
             story.BindExternalFunction("fungus_message", (string message) => Flowchart.BroadcastFungusMessage(message), false);
             story.BindExternalFunction("set_active", (string path, bool active) => SetActive(path, active), false);
+            story.BindExternalFunction("play_animation", (string path, string state) => PlayAnimation(path, state), false);
         }
 
         /// <summary>
         /// Activates or deactivates a scene object by its hierarchy path, e.g. "/NPC/Cap/Dialog". Finds inactive objects too.
         /// </summary>
         public static void SetActive(string path, bool active)
+        {
+            var found = FindByPath(path);
+            if (found != null)
+            {
+                found.SetActive(active);
+            }
+        }
+
+        /// <summary>
+        /// Plays an Animator state from its start, like Fungus' PlayAnimState, e.g. ("/Vehicles/Diana airship", "Landing").
+        /// </summary>
+        public static void PlayAnimation(string path, string state)
+        {
+            var found = FindByPath(path);
+            var animator = found != null ? found.GetComponent<Animator>() : null;
+            if (animator == null)
+            {
+                Debug.LogWarning("Ink: no Animator at '" + path + "'");
+                return;
+            }
+            animator.Play(state, -1, 0f);
+        }
+
+        // A scene object by its hierarchy path in any loaded scene, inactive ones included.
+        private static GameObject FindByPath(string path)
         {
             var parts = path.TrimStart('/').Split(new[] { '/' }, 2);
             for (int i = 0; i < SceneManager.sceneCount; i++)
@@ -35,13 +61,13 @@ namespace KopliSoft.Dialogue
                         var found = parts.Length == 1 ? root.transform : root.transform.Find(parts[1]);
                         if (found != null)
                         {
-                            found.gameObject.SetActive(active);
-                            return;
+                            return found.gameObject;
                         }
                     }
                 }
             }
             Debug.LogWarning("Ink: no scene object at '" + path + "'");
+            return null;
         }
 
         public static void SetBool(string flowchartName, string variable, bool value)

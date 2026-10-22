@@ -19,6 +19,8 @@ public class GameData
     public KopliSoft.Investigation.CaseFileState investigation;
     // Ink story state (visit counts, variables) as ink's own JSON.
     public string inkState;
+    // The airship "Diana" (KopliSoft.Vehicles.AirshipState).
+    public AirshipSaveData airship;
 
     public GameData()
     {

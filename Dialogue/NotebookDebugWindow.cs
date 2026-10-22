@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using KopliSoft.Controls;
 using KopliSoft.Investigation;
 using UnityEngine;
 
@@ -11,9 +12,6 @@ namespace KopliSoft.Dialogue
     /// </summary>
     public class NotebookDebugWindow : MonoBehaviour
     {
-        [SerializeField]
-        private KeyCode notebookKey = KeyCode.N;
-
         private bool open;
         private Vector2 scroll;
         private readonly HashSet<string> selected = new HashSet<string>();
@@ -24,7 +22,7 @@ namespace KopliSoft.Dialogue
         void Update()
         {
             var runner = InkDialogueRunner.Instance;
-            if (Input.GetKeyDown(notebookKey) && (runner == null || !runner.IsRunning) && InvestigationManager.Instance != null)
+            if (GameInput.GetDown(GameAction.Notebook) && (runner == null || !runner.IsRunning) && InvestigationManager.Instance != null)
             {
                 open = !open;
                 if (open)
@@ -110,7 +108,7 @@ namespace KopliSoft.Dialogue
             GUILayout.Label(focusedText);
 
             GUILayout.EndScrollView();
-            GUILayout.Label("<i>" + notebookKey + " to close</i>");
+            GUILayout.Label("<i>" + GameInput.DisplayName(GameAction.Notebook) + " to close</i>");
             GUILayout.EndArea();
         }
 

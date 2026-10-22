@@ -1,5 +1,7 @@
 using Ink.Runtime;
+using KopliSoft.Controls;
 using KopliSoft.Investigation;
+using KopliSoft.Vehicles;
 using UnityEngine;
 
 namespace KopliSoft.Dialogue
@@ -50,6 +52,25 @@ namespace KopliSoft.Dialogue
             };
             InkCaseBindings.Bind(Story, CaseFile, Debug.LogWarning);
             FungusBridge.Bind(Story);
+            // World state changes, e.g. ~ airship_event("landing_complete").
+            Story.BindExternalFunction("airship_event", (string name) =>
+            {
+                var airship = AirshipState.Instance;
+                if (airship == null || !airship.HandleEvent(name))
+                {
+                    Debug.LogWarning("Ink: airship_event('" + name + "') " + (airship == null ? "has no AirshipState in the scene" : "is unknown"));
+                }
+            }, false);
+            // Texts name keys through the player's current bindings, e.g. {key_name("Notebook")}.
+            Story.BindExternalFunction("key_name", (string action) =>
+            {
+                var name = GameInput.DisplayName(action);
+                if (name == null)
+                {
+                    Debug.LogWarning("Ink: unknown input action '" + action + "'");
+                }
+                return (object)(name ?? action);
+            }, true);
         }
 
         void OnDestroy()

@@ -109,6 +109,54 @@ namespace KopliSoft.EditorTools
             Selection.activeGameObject = investigation;
         }
 
+        private static readonly string[,] AirshipReferences =
+        {
+            { "moving", "/Vehicles/Diana airship/Moving" },
+            { "anchored", "/Vehicles/Diana airship/Anchored" },
+            { "captainInside", "/Vehicles/Diana airship/Crew/Cap" },
+            { "captainOutside", "/NPC/Cap" },
+            { "machineNoise", "/Vehicles/Diana airship/Moving/Machine noise" },
+            { "landingNoise", "/Vehicles/Diana airship/Moving/Landing noise" },
+            { "exitControlCar", "/Vehicles/Diana airship/Triggers/Exit Control Car" },
+            { "captainApproachedTrigger", "/Vehicles/Diana airship/Triggers/Captain Approached" },
+            { "sleepTrigger", "/Vehicles/Diana airship/Triggers/Sleep" },
+            { "captainDialog", "/NPC/Cap/Dialog" },
+        };
+
+        /// <summary>
+        /// Adds AirshipState to the airship and wires its scene references (the objects the Fungus "FlowChart" switched).
+        /// </summary>
+        [MenuItem("Polygon/Investigation/Set Up Airship State")]
+        public static void SetUpAirshipState()
+        {
+            var scene = EditorSceneManager.GetActiveScene();
+            var airship = FindInScene(scene, "/Vehicles/Diana airship");
+            if (airship == null)
+            {
+                EditorUtility.DisplayDialog("Airship state", "/Vehicles/Diana airship not found in the open scene.", "OK");
+                return;
+            }
+            Undo.SetCurrentGroupName("Set up airship state");
+            var report = new System.Text.StringBuilder();
+            var state = Ensure<KopliSoft.Vehicles.AirshipState>(airship, report);
+            for (int i = 0; i < AirshipReferences.GetLength(0); i++)
+            {
+                var target = FindInScene(scene, AirshipReferences[i, 1]);
+                if (target == null)
+                {
+                    report.AppendLine("WARNING: " + AirshipReferences[i, 1] + " not found, set '" + AirshipReferences[i, 0] + "' by hand.");
+                    continue;
+                }
+                SetReference(state, AirshipReferences[i, 0], target);
+            }
+            EditorSceneManager.MarkSceneDirty(scene);
+            report.AppendLine("Done. Now remove the Fungus state machine: select /Vehicles/Diana airship/FlowChart and run " +
+                "Polygon → Investigation → Remove Fungus Flowchart From Selected. Then save the scene.");
+            Debug.Log("[Airship state]\n" + report, state);
+            EditorUtility.DisplayDialog("Airship state", report.ToString(), "OK");
+            Selection.activeGameObject = airship;
+        }
+
         // Like GameObject.Find("/a/b"), but also finds inactive objects.
         private static GameObject FindInScene(UnityEngine.SceneManagement.Scene scene, string path)
         {
@@ -214,6 +262,140 @@ namespace KopliSoft.EditorTools
             EditorSceneManager.MarkSceneDirty(target.scene);
             Debug.Log("[Investigation] " + target.name + " now plays ink knot '" + knot + "' (was Fungus flowchart '" +
                 (flowchart != null ? flowchart.name : flowchartName) + "'). Save the scene to keep it, or Undo.", target);
+        }
+    }
+
+    /// <summary>
+    /// Replaces a Fungus "Trigger" event handler on the selected object with an InkTrigger that plays a knot,
+    /// keeping the tag filter and Enter/Stay/Exit settings. The flowchart itself stays in the scene.
+    /// </summary>
+    public class ConvertTriggerToInkWindow : EditorWindow
+    {
+        private string knot = "";
+
+        [MenuItem("Polygon/Investigation/Convert Selected Fungus Trigger To Ink...")]
+        public static void Open()
+        {
+            GetWindow<ConvertTriggerToInkWindow>(true, "Convert trigger to ink").minSize = new Vector2(380, 150);
+        }
+
+        void OnGUI()
+        {
+            var selected = Selection.activeGameObject;
+            var trigger = selected != null ? selected.GetComponent<Fungus.Trigger>() : null;
+
+            EditorGUILayout.HelpBox("Replaces the Fungus Trigger event handler of the selected object with an InkTrigger that " +
+                "plays the knot below, with the same tag filter and fire-on settings. Undo reverts it.", MessageType.Info);
+            knot = EditorGUILayout.TextField("Ink knot", knot);
+
+            if (trigger == null)
+            {
+                EditorGUILayout.HelpBox("Select an object that has a Fungus Trigger event handler.", MessageType.Warning);
+                return;
+            }
+            EditorGUILayout.LabelField("Trigger on", selected.name);
+
+            if (GUILayout.Button("Convert") && !string.IsNullOrWhiteSpace(knot))
+            {
+                Convert(trigger, knot.Trim());
+                Close();
+            }
+        }
+
+        private static void Convert(Fungus.Trigger trigger, string knot)
+        {
+            var target = trigger.gameObject;
+            Undo.SetCurrentGroupName("Convert trigger to ink");
+
+            var source = new SerializedObject(trigger);
+            var tags = source.FindProperty("tagFilter");
+            var tagFilter = new string[tags.arraySize];
+            for (int i = 0; i < tagFilter.Length; i++)
+            {
+                tagFilter[i] = tags.GetArrayElementAtIndex(i).stringValue;
+            }
+            // Fungus' PhysicsMessageType and InkTrigger.FireOn share the same flag values.
+            var fireOn = (InkTrigger.FireOn)source.FindProperty("FireOn").intValue;
+
+            var ink = Undo.AddComponent<InkTrigger>(target);
+            Undo.RecordObject(ink, "Configure InkTrigger");
+            ink.Configure(knot, tagFilter, fireOn);
+            Undo.DestroyObjectImmediate(trigger);
+
+            EditorSceneManager.MarkSceneDirty(target.scene);
+            Debug.Log("[Investigation] " + target.name + " now plays ink knot '" + knot + "' on " + fireOn + " for tags [" +
+                string.Join(", ", tagFilter) + "]. Save the scene to keep it, or Undo.", target);
+        }
+    }
+
+    public static class InkEventsSetup
+    {
+        /// <summary>
+        /// Adds InkEvents to the selected object, so its animation events can call PlayKnot("knot").
+        /// </summary>
+        [MenuItem("Polygon/Investigation/Add Ink Events To Selected")]
+        public static void AddToSelected()
+        {
+            var selected = Selection.activeGameObject;
+            if (selected == null)
+            {
+                EditorUtility.DisplayDialog("Ink events", "Select the object with the Animator first.", "OK");
+                return;
+            }
+            if (selected.GetComponent<Animator>() == null)
+            {
+                Debug.LogWarning("[Investigation] " + selected.name + " has no Animator: animation events will not reach InkEvents.", selected);
+            }
+            if (selected.GetComponent<InkEvents>() == null)
+            {
+                Undo.AddComponent<InkEvents>(selected);
+                EditorSceneManager.MarkSceneDirty(selected.scene);
+                Debug.Log("[Investigation] Added InkEvents to " + selected.name + ". Save the scene to keep it.", selected);
+            }
+        }
+    }
+
+    public static class FungusCleanup
+    {
+        /// <summary>
+        /// Removes the Fungus flowchart on the selected object together with its blocks, commands, event handlers and
+        /// variables, which Fungus keeps as hidden components on the same object. Other components stay. Undoable.
+        /// Only for flowcharts that nothing uses any more (check with Tools/FungusExport before).
+        /// </summary>
+        [MenuItem("Polygon/Investigation/Remove Fungus Flowchart From Selected")]
+        public static void RemoveFromSelected()
+        {
+            var selected = Selection.activeGameObject;
+            var flowchart = selected != null ? selected.GetComponent<Fungus.Flowchart>() : null;
+            if (flowchart == null)
+            {
+                EditorUtility.DisplayDialog("Remove Fungus flowchart", "The selected object has no Fungus Flowchart.", "OK");
+                return;
+            }
+
+            // Dependents first: event handlers require blocks, blocks and variables require the flowchart.
+            var parts = new System.Collections.Generic.List<Component>();
+            parts.AddRange(selected.GetComponents<Fungus.Command>());
+            parts.AddRange(selected.GetComponents<Fungus.EventHandler>());
+            parts.AddRange(selected.GetComponents<Fungus.Variable>());
+            parts.AddRange(selected.GetComponents<Fungus.Block>());
+            parts.Add(flowchart);
+
+            if (!EditorUtility.DisplayDialog("Remove Fungus flowchart",
+                "Remove the flowchart of '" + selected.name + "' and its " + (parts.Count - 1) + " hidden parts (blocks, commands, " +
+                "event handlers, variables)? Other components stay. Undo restores it.", "Remove", "Cancel"))
+            {
+                return;
+            }
+
+            Undo.SetCurrentGroupName("Remove Fungus flowchart");
+            foreach (var part in parts)
+            {
+                Undo.DestroyObjectImmediate(part);
+            }
+            EditorSceneManager.MarkSceneDirty(selected.scene);
+            Debug.Log("[Investigation] Removed the Fungus flowchart of " + selected.name + " (" + parts.Count + " components). " +
+                "Save the scene to keep it, or Undo.", selected);
         }
     }
 }

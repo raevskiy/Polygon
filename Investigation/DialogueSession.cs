@@ -13,16 +13,34 @@ namespace KopliSoft.Investigation
         public IReadOnlyList<string> Tags { get; private set; }
         // Note Anna can write down while this line is shown, or null.
         public string NoteId { get; private set; }
+        // How the speaker is heard, e.g. "over the radio" (from a #via tag), or null when in person.
+        public string Channel { get; private set; }
 
-        public DialogueLine(CharacterDefinition speaker, string text, IReadOnlyList<string> tags, string noteId)
+        public DialogueLine(CharacterDefinition speaker, string text, IReadOnlyList<string> tags, string noteId, string channel = null)
         {
             Speaker = speaker;
             Text = text;
             Tags = tags;
             NoteId = noteId;
+            Channel = channel;
         }
 
         public string SpeakerName { get { return Speaker != null ? Speaker.name : null; } }
+
+        /// <summary>
+        /// The name to show, e.g. "Captain J. Meister &lt;over the radio&gt;". Matches the Fungus Character names.
+        /// </summary>
+        public string DisplayName
+        {
+            get
+            {
+                if (Speaker == null)
+                {
+                    return null;
+                }
+                return Channel != null ? Speaker.name + " <" + Channel + ">" : Speaker.name;
+            }
+        }
     }
 
     public enum DialogueStepKind
@@ -58,12 +76,22 @@ namespace KopliSoft.Investigation
     public static class DialogueLineParser
     {
         public const string NoteTag = "note";
+        public const string ViaTag = "via";
+        public const string LineBreak = "<br>";
+
+        // "#via:radio" -> "over the radio". Unknown values are shown as written.
+        public static readonly IReadOnlyDictionary<string, string> Channels = new Dictionary<string, string>
+        {
+            { "radio", "over the radio" },
+            { "tube", "over the speaking tube" },
+        };
 
         private static readonly Regex SpeakerPrefix = new Regex(@"^\s*([A-Za-z][A-Za-z0-9_]*)\s*:\s+(.*)$", RegexOptions.Singleline);
 
         public static DialogueLine Parse(string rawText, IList<string> tags, CaseDefinition definition)
         {
-            var text = (rawText ?? string.Empty).Trim();
+            // Ink collapses whitespace and cannot hold a newline inside a line, so "<br>" marks a line break (log pages, tables).
+            var text = (rawText ?? string.Empty).Trim().Replace(LineBreak, "\n");
             CharacterDefinition speaker = null;
             var match = SpeakerPrefix.Match(text);
             if (match.Success)
@@ -76,7 +104,13 @@ namespace KopliSoft.Investigation
             }
 
             var tagList = tags != null ? tags.Select(t => t.Trim()).ToList() : new List<string>();
-            return new DialogueLine(speaker, text, tagList, TagValue(tagList, NoteTag));
+            var via = TagValue(tagList, ViaTag);
+            string channel = null;
+            if (via != null && !Channels.TryGetValue(via, out channel))
+            {
+                channel = via;
+            }
+            return new DialogueLine(speaker, text, tagList, TagValue(tagList, NoteTag), channel);
         }
 
         /// <summary>

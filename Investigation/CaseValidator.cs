@@ -49,7 +49,10 @@ namespace KopliSoft.Investigation
     public static class CaseValidator
     {
         // Real country names must not appear in game text (see GAME_BIBLE.md).
-        public static readonly string[] DefaultForbiddenWords = { "Ukrain", "USSR", "Soviet" };
+        public static readonly string[] DefaultForbiddenWords = { "Ukrain", "USSR", "Soviet", "URSS" };
+        // Aircraft registrations are "CIV-<ISO 3166 numeric country code>-<number>", e.g. CIV-804-84103 (see Assets/Story/README.md).
+        // Letters directly followed by digits (UR84103, MC485) is the old style.
+        private static readonly Regex OldRegistration = new Regex(@"\b[A-Z]{1,4}\d{3,6}\b");
 
         private static readonly Regex NoteTag = new Regex(@"#\s*note\s*:\s*([A-Za-z0-9_]+)");
         private static readonly Regex FunctionCall = new Regex(@"\b(has_note|add_note|has_conclusion|task_active|task_done|start_task|complete_task)\s*\(\s*""([^""]*)""\s*\)");
@@ -285,6 +288,14 @@ namespace KopliSoft.Investigation
                 if (texts.Any(t => t != null && t.IndexOf(word, StringComparison.OrdinalIgnoreCase) >= 0))
                 {
                     issues.Add(Warning(where, "contains the forbidden word '" + word + "'"));
+                }
+            }
+            foreach (var text in texts.Where(t => t != null))
+            {
+                var match = OldRegistration.Match(text);
+                if (match.Success)
+                {
+                    issues.Add(Warning(where, "'" + match.Value + "' looks like an old-style aircraft registration; use CIV-<country code>-<number>"));
                 }
             }
         }

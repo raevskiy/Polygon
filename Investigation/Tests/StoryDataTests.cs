@@ -98,5 +98,18 @@ namespace KopliSoft.Investigation.Tests
             Assert.That(errors, Has.Some.Contains("unknown conclusion 'nothing'"));
             Assert.That(errors, Has.Some.Contains("conclusion x: can never be reached"));
         }
+
+        [Test]
+        public void ValidatorWarnsAboutOldRegistrations()
+        {
+            var definition = CaseDefinition.FromJson(@"{ ""id"": ""t"", ""notes"": [ { ""id"": ""a"", ""title"": ""A"", ""text"": ""MC485 crashed."", ""legacyItemId"": 1 } ] }");
+            var ink = new[] { new InkSourceFile("t.ink", "UR84103 landed, CIV-804-84103 too.") };
+
+            var warnings = CaseValidator.Validate(definition, ink).Where(i => i.Severity == IssueSeverity.Warning).Select(i => i.ToString()).ToList();
+
+            Assert.That(warnings, Has.Some.Contains("'MC485' looks like an old-style aircraft registration"));
+            Assert.That(warnings, Has.Some.Contains("'UR84103' looks like an old-style aircraft registration"));
+            Assert.That(warnings, Has.None.Contains("CIV-804-84103"));
+        }
     }
 }

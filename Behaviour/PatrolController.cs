@@ -50,7 +50,9 @@ namespace KopliSoft.Behaviour
         private bool trackedTargetFound;
         private int disableBehaviorCounter = 0;
 
-        void Start()
+        // Awake, not Start: Fungus may call FollowPlan* in the same frame the NPC is activated (the "Day" flowchart),
+        // before Start has run.
+        void Awake()
         {
             health = GetComponent(typeof(CharacterHealth)) as CharacterHealth;
             behaviorTree = GetComponent<BehaviorTree>();
@@ -59,7 +61,10 @@ namespace KopliSoft.Behaviour
             characterController = GetComponent<RigidbodyCharacterController>();
             speedChange = GetComponent<SpeedChange>();
             inventory = GetComponent<Opsive.ThirdPersonController.Wrappers.Inventory>();
+        }
 
+        void Start()
+        {
             if (flowchart == null && flowchartName != null && flowchartName.Trim().Length != 0)
             {
                 flowchart = GameObject.Find("/Fungus/Flowcharts/" + flowchartName).GetComponent<Fungus.Flowchart>();

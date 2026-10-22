@@ -7,7 +7,7 @@ namespace KopliSoft.Investigation.Tests
     {
         private const string CaseJson = @"{
             ""id"": ""test"",
-            ""characters"": [ { ""id"": ""Yuri"", ""name"": ""Yuri Solomko"" }, { ""id"": ""Anna"", ""name"": ""Anna"" } ],
+            ""characters"": [ { ""id"": ""FlyingClubMaster"", ""name"": ""Yuri Solomko"" }, { ""id"": ""Protagonist"", ""name"": ""Anna"" } ],
             ""notes"": [ { ""id"": ""strike"", ""title"": ""Strike"", ""text"": ""strike"" } ],
             ""conclusions"": [],
             ""tasks"": [ { ""id"": ""t"", ""title"": ""T"", ""text"": ""t"" } ]
@@ -22,14 +22,14 @@ EXTERNAL start_task(id)
 ~ return
 
 === talk ===
-Yuri: A layoff was declared. #note:strike
+FlyingClubMaster: A layoff was declared. #note:strike
 <Yuri grins>
 Note: this is not a speaker.
 * { has_note(""strike"") } [Ask more]
-    Yuri: More. -> DONE
+    FlyingClubMaster: More. -> DONE
 + [Bye]
     ~ start_task(""t"")
-    Anna: See you.
+    Protagonist: See you.
     -> DONE
 ";
 
@@ -44,10 +44,27 @@ Note: this is not a speaker.
         [Test]
         public void ParsesSpeakerAndNoteTag()
         {
-            var line = DialogueLineParser.Parse("Yuri: Hello there.\n", new[] { "note:strike" }, definition);
+            var line = DialogueLineParser.Parse("FlyingClubMaster: Hello there.\n", new[] { "note:strike" }, definition);
             Assert.AreEqual("Yuri Solomko", line.SpeakerName);
             Assert.AreEqual("Hello there.", line.Text);
             Assert.AreEqual("strike", line.NoteId);
+        }
+
+        [Test]
+        public void ViaTagAddsTheChannelToTheShownName()
+        {
+            var line = DialogueLineParser.Parse("FlyingClubMaster: Bonan vesperon.", new[] { "via:radio" }, definition);
+            Assert.AreEqual("Yuri Solomko", line.SpeakerName);
+            Assert.AreEqual("Yuri Solomko <over the radio>", line.DisplayName);
+            Assert.AreEqual("Yuri Solomko <over the speaking tube>", DialogueLineParser.Parse("FlyingClubMaster: Bone.", new[] { "via:tube" }, definition).DisplayName);
+            Assert.AreEqual("Yuri Solomko", DialogueLineParser.Parse("FlyingClubMaster: Hi.", null, definition).DisplayName);
+        }
+
+        [Test]
+        public void LineBreakMarkerBecomesNewline()
+        {
+            var line = DialogueLineParser.Parse("Date | Status<br>29.08.1936 | Arrival", null, definition);
+            Assert.AreEqual("Date | Status\n29.08.1936 | Arrival", line.Text);
         }
 
         [Test]

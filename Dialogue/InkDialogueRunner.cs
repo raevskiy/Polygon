@@ -80,6 +80,19 @@ namespace KopliSoft.Dialogue
                 return false;
             }
 
+            // A knot that shows nothing (only logic, or a guard like "already done") runs silently:
+            // no dialogue box, no cursor or input locking. Triggers rely on this.
+            var first = NextStep();
+            if (first.Kind == DialogueStepKind.End)
+            {
+                session = null;
+                if (onEnded != null)
+                {
+                    onEnded();
+                }
+                return true;
+            }
+
             IsRunning = true;
             this.knot = knot;
             this.onEnded = onEnded;
@@ -88,23 +101,30 @@ namespace KopliSoft.Dialogue
             {
                 DialogueStarted(knot);
             }
-            Advance();
+            Show(first);
             return true;
         }
 
-        private void Advance()
+        private DialogueStep NextStep()
         {
-            DialogueStep step;
             try
             {
-                step = session.Next();
+                return session.Next();
             }
             catch (Exception e)
             {
                 Debug.LogException(e);
-                step = DialogueStep.End;
+                return DialogueStep.End;
             }
+        }
 
+        private void Advance()
+        {
+            Show(NextStep());
+        }
+
+        private void Show(DialogueStep step)
+        {
             switch (step.Kind)
             {
                 case DialogueStepKind.Line:
@@ -123,11 +143,12 @@ namespace KopliSoft.Dialogue
         {
             var dialog = GetSayDialog();
             dialog.SetActive(true);
-            var character = FindCharacter(line.SpeakerName);
+            // "Captain J. Meister <over the radio>" has its own Fungus Character (color, portrait).
+            var character = FindCharacter(line.DisplayName) ?? FindCharacter(line.SpeakerName);
             dialog.SetCharacter(character);
-            if (character == null && line.SpeakerName != null)
+            if (line.DisplayName != null && (character == null || character.NameText != line.DisplayName))
             {
-                dialog.SetCharacterName(line.SpeakerName, Color.white);
+                dialog.SetCharacterName(line.DisplayName, character != null ? character.NameColor : Color.white);
             }
 
             CurrentLine = line;
