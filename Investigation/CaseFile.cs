@@ -14,7 +14,7 @@ namespace KopliSoft.Investigation
         Incomplete,
         // The selected cards do not combine this way.
         NoMatch,
-        // Fewer than two cards, or cards that Anna does not have.
+        // Fewer than two cards, or cards the player does not have.
         InvalidSelection
     }
 
@@ -44,7 +44,7 @@ namespace KopliSoft.Investigation
     }
 
     /// <summary>
-    /// Anna's progress in a case: notes written down, conclusions reached and her tasks.
+    /// The player's progress in a case: notes written down, conclusions reached and tasks.
     /// Notes and conclusions are both "cards" that can be combined into further conclusions.
     /// </summary>
     public class CaseFile
@@ -130,7 +130,7 @@ namespace KopliSoft.Investigation
         }
 
         /// <summary>
-        /// Completes a task, active or not (a task can be solved before Anna sets it for herself).
+        /// Completes a task, active or not (a task can be solved before the player has it).
         /// </summary>
         public bool CompleteTask(string id)
         {

@@ -11,7 +11,7 @@ namespace KopliSoft.Investigation
         public CharacterDefinition Speaker { get; private set; }
         public string Text { get; private set; }
         public IReadOnlyList<string> Tags { get; private set; }
-        // Note Anna can write down while this line is shown, or null.
+        // Note the player can write down while this line is shown, or null.
         public string NoteId { get; private set; }
         // How the speaker is heard, e.g. "over the radio" (from a #via tag), or null when in person.
         public string Channel { get; private set; }
@@ -28,7 +28,7 @@ namespace KopliSoft.Investigation
         public string SpeakerName { get { return Speaker != null ? Speaker.name : null; } }
 
         /// <summary>
-        /// The name to show, e.g. "Captain J. Meister &lt;over the radio&gt;". Matches the Fungus Character names.
+        /// The name to show, e.g. "Operator &lt;over the radio&gt;". Matches the Fungus Character names.
         /// </summary>
         public string DisplayName
         {
@@ -71,7 +71,7 @@ namespace KopliSoft.Investigation
 
     /// <summary>
     /// Turns raw ink output into dialogue lines, following the conventions in Assets/Story/README.md:
-    /// "Yuri: text" is spoken by the character with id Yuri; "#note:some_id" offers a note to write down.
+    /// "Guide: text" is spoken by the character with id Guide; "#note:some_id" offers a note to write down.
     /// </summary>
     public static class DialogueLineParser
     {

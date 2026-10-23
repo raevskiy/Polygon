@@ -143,7 +143,7 @@ namespace KopliSoft.Dialogue
         {
             var dialog = GetSayDialog();
             dialog.SetActive(true);
-            // "Captain J. Meister <over the radio>" has its own Fungus Character (color, portrait).
+            // "Operator <over the radio>" can have its own Fungus Character (color, portrait).
             var character = FindCharacter(line.DisplayName) ?? FindCharacter(line.SpeakerName);
             dialog.SetCharacter(character);
             if (line.DisplayName != null && (character == null || character.NameText != line.DisplayName))

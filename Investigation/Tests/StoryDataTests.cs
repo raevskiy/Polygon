@@ -100,16 +100,29 @@ namespace KopliSoft.Investigation.Tests
         }
 
         [Test]
-        public void ValidatorWarnsAboutOldRegistrations()
+        public void ValidatorWarnsAboutTheCasesForbiddenWords()
         {
-            var definition = CaseDefinition.FromJson(@"{ ""id"": ""t"", ""notes"": [ { ""id"": ""a"", ""title"": ""A"", ""text"": ""MC485 crashed."", ""legacyItemId"": 1 } ] }");
-            var ink = new[] { new InkSourceFile("t.ink", "UR84103 landed, CIV-804-84103 too.") };
+            var definition = CaseDefinition.FromJson(@"{ ""id"": ""t"", ""forbiddenWords"": [ ""dragon"" ],
+                ""notes"": [ { ""id"": ""a"", ""title"": ""A"", ""text"": ""A Dragon was seen."", ""legacyItemId"": 1 } ] }");
+            var ink = new[] { new InkSourceFile("t.ink", "Guide: No dragons here.") };
 
             var warnings = CaseValidator.Validate(definition, ink).Where(i => i.Severity == IssueSeverity.Warning).Select(i => i.ToString()).ToList();
 
-            Assert.That(warnings, Has.Some.Contains("'MC485' looks like an old-style aircraft registration"));
-            Assert.That(warnings, Has.Some.Contains("'UR84103' looks like an old-style aircraft registration"));
-            Assert.That(warnings, Has.None.Contains("CIV-804-84103"));
+            Assert.That(warnings, Has.Some.Contains("note a: contains the forbidden word 'dragon'"));
+            Assert.That(warnings, Has.Some.Contains("t.ink:1: contains the forbidden word 'dragon'"));
+        }
+
+        [Test]
+        public void ValidatorWarnsAboutOldRegistrations()
+        {
+            var definition = CaseDefinition.FromJson(@"{ ""id"": ""t"", ""notes"": [ { ""id"": ""a"", ""title"": ""A"", ""text"": ""AB485 landed."", ""legacyItemId"": 1 } ] }");
+            var ink = new[] { new InkSourceFile("t.ink", "XY1234 left, CIV-111-1234 too.") };
+
+            var warnings = CaseValidator.Validate(definition, ink).Where(i => i.Severity == IssueSeverity.Warning).Select(i => i.ToString()).ToList();
+
+            Assert.That(warnings, Has.Some.Contains("'AB485' looks like an old-style aircraft registration"));
+            Assert.That(warnings, Has.Some.Contains("'XY1234' looks like an old-style aircraft registration"));
+            Assert.That(warnings, Has.None.Contains("CIV-111-1234"));
         }
     }
 }

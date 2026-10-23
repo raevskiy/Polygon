@@ -8,7 +8,7 @@ namespace KopliSoft.Interaction
     /// </summary>
     public class InkDialogInteractable : ConversationInteractable
     {
-        [Tooltip("Knot in the chapter ink story, e.g. \"yuri\"")]
+        [Tooltip("Knot in the chapter ink story, e.g. \"librarian\"")]
         [SerializeField]
         private string knot;
 

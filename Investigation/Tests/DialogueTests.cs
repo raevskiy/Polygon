@@ -7,8 +7,8 @@ namespace KopliSoft.Investigation.Tests
     {
         private const string CaseJson = @"{
             ""id"": ""test"",
-            ""characters"": [ { ""id"": ""FlyingClubMaster"", ""name"": ""Yuri Solomko"" }, { ""id"": ""Protagonist"", ""name"": ""Anna"" } ],
-            ""notes"": [ { ""id"": ""strike"", ""title"": ""Strike"", ""text"": ""strike"" } ],
+            ""characters"": [ { ""id"": ""Guide"", ""name"": ""Museum Guide"" }, { ""id"": ""Visitor"", ""name"": ""Visitor"" } ],
+            ""notes"": [ { ""id"": ""opening_hours"", ""title"": ""Opening hours"", ""text"": ""opening hours"" } ],
             ""conclusions"": [],
             ""tasks"": [ { ""id"": ""t"", ""title"": ""T"", ""text"": ""t"" } ]
         }";
@@ -22,14 +22,14 @@ EXTERNAL start_task(id)
 ~ return
 
 === talk ===
-FlyingClubMaster: A layoff was declared. #note:strike
-<Yuri grins>
+Guide: The museum opens at nine. #note:opening_hours
+<The guide smiles>
 Note: this is not a speaker.
-* { has_note(""strike"") } [Ask more]
-    FlyingClubMaster: More. -> DONE
+* { has_note(""opening_hours"") } [Ask more]
+    Guide: More. -> DONE
 + [Bye]
     ~ start_task(""t"")
-    Protagonist: See you.
+    Visitor: See you.
     -> DONE
 ";
 
@@ -44,27 +44,27 @@ Note: this is not a speaker.
         [Test]
         public void ParsesSpeakerAndNoteTag()
         {
-            var line = DialogueLineParser.Parse("FlyingClubMaster: Hello there.\n", new[] { "note:strike" }, definition);
-            Assert.AreEqual("Yuri Solomko", line.SpeakerName);
+            var line = DialogueLineParser.Parse("Guide: Hello there.\n", new[] { "note:opening_hours" }, definition);
+            Assert.AreEqual("Museum Guide", line.SpeakerName);
             Assert.AreEqual("Hello there.", line.Text);
-            Assert.AreEqual("strike", line.NoteId);
+            Assert.AreEqual("opening_hours", line.NoteId);
         }
 
         [Test]
         public void ViaTagAddsTheChannelToTheShownName()
         {
-            var line = DialogueLineParser.Parse("FlyingClubMaster: Bonan vesperon.", new[] { "via:radio" }, definition);
-            Assert.AreEqual("Yuri Solomko", line.SpeakerName);
-            Assert.AreEqual("Yuri Solomko <over the radio>", line.DisplayName);
-            Assert.AreEqual("Yuri Solomko <over the speaking tube>", DialogueLineParser.Parse("FlyingClubMaster: Bone.", new[] { "via:tube" }, definition).DisplayName);
-            Assert.AreEqual("Yuri Solomko", DialogueLineParser.Parse("FlyingClubMaster: Hi.", null, definition).DisplayName);
+            var line = DialogueLineParser.Parse("Guide: Good evening.", new[] { "via:radio" }, definition);
+            Assert.AreEqual("Museum Guide", line.SpeakerName);
+            Assert.AreEqual("Museum Guide <over the radio>", line.DisplayName);
+            Assert.AreEqual("Museum Guide <over the speaking tube>", DialogueLineParser.Parse("Guide: Fine.", new[] { "via:tube" }, definition).DisplayName);
+            Assert.AreEqual("Museum Guide", DialogueLineParser.Parse("Guide: Hi.", null, definition).DisplayName);
         }
 
         [Test]
         public void LineBreakMarkerBecomesNewline()
         {
-            var line = DialogueLineParser.Parse("Date | Status<br>29.08.1936 | Arrival", null, definition);
-            Assert.AreEqual("Date | Status\n29.08.1936 | Arrival", line.Text);
+            var line = DialogueLineParser.Parse("Date | Status<br>01.01.2000 | Open", null, definition);
+            Assert.AreEqual("Date | Status\n01.01.2000 | Open", line.Text);
         }
 
         [Test]
@@ -87,8 +87,8 @@ Note: this is not a speaker.
 
             var first = session.Next();
             Assert.AreEqual(DialogueStepKind.Line, first.Kind);
-            Assert.AreEqual("strike", first.Line.NoteId);
-            Assert.AreEqual("<Yuri grins>", session.Next().Line.Text);
+            Assert.AreEqual("opening_hours", first.Line.NoteId);
+            Assert.AreEqual("<The guide smiles>", session.Next().Line.Text);
             Assert.IsNull(session.Next().Line.Speaker);
 
             // Without the note only "Bye" is offered.
@@ -108,7 +108,7 @@ Note: this is not a speaker.
             var story = StoryFiles.Compile(Ink);
             var caseFile = new CaseFile(definition);
             InkCaseBindings.Bind(story, caseFile, message => Assert.Fail(message));
-            caseFile.AddNote("strike");
+            caseFile.AddNote("opening_hours");
             var session = new DialogueSession(story, definition);
             session.Begin("talk");
 

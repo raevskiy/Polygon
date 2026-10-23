@@ -48,22 +48,21 @@ namespace KopliSoft.Investigation
     /// </summary>
     public static class CaseValidator
     {
-        // Real country names must not appear in game text (see GAME_BIBLE.md).
-        public static readonly string[] DefaultForbiddenWords = { "Ukrain", "USSR", "Soviet", "URSS" };
-        // Aircraft registrations are "CIV-<ISO 3166 numeric country code>-<number>", e.g. CIV-804-84103 (see Assets/Story/README.md).
-        // Letters directly followed by digits (UR84103, MC485) is the old style.
+        // Aircraft registrations are "CIV-<ISO 3166 numeric country code>-<number>" (see Assets/Story/README.md).
+        // Letters directly followed by digits (e.g. AB1234) is the old style.
         private static readonly Regex OldRegistration = new Regex(@"\b[A-Z]{1,4}\d{3,6}\b");
 
         private static readonly Regex NoteTag = new Regex(@"#\s*note\s*:\s*([A-Za-z0-9_]+)");
         private static readonly Regex FunctionCall = new Regex(@"\b(has_note|add_note|has_conclusion|task_active|task_done|start_task|complete_task)\s*\(\s*""([^""]*)""\s*\)");
-        // snake_case identifiers, and whole function calls such as fungus_bool("item6", "InvestigateSovietAirplane").
+        // snake_case identifiers, and whole function calls such as fungus_bool("Flowchart", "SomeVariable").
         private static readonly Regex Identifier = new Regex(@"\b\w+\s*\([^)]*\)|\b[A-Za-z0-9]+(?:_[A-Za-z0-9]+)+\b");
         private static readonly Regex SpeakerPrefix = new Regex(@"^\s*(?:[*+]\s*)*(?:\[[^\]]*\]\s*)?([A-Z][A-Za-z0-9_]*)\s*:\s");
 
         public static List<ValidationIssue> Validate(CaseDefinition definition, IEnumerable<InkSourceFile> inkFiles, IEnumerable<string> forbiddenWords = null)
         {
             var issues = new List<ValidationIssue>();
-            var words = (forbiddenWords ?? DefaultForbiddenWords).ToList();
+            // Words that must not appear in player-facing text come from the case data (forbiddenWords), not from code.
+            var words = (forbiddenWords ?? definition.forbiddenWords ?? new List<string>()).ToList();
             var inkList = (inkFiles ?? Enumerable.Empty<InkSourceFile>()).ToList();
 
             ValidateDefinition(definition, words, issues);

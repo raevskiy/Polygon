@@ -13,7 +13,7 @@ namespace KopliSoft.Investigation
 
     public class CharacterDefinition
     {
-        // Used as the line prefix in ink: "Yuri: Hello."
+        // Used as the line prefix in ink: "Guide: Hello."
         public string id;
         // Display name. Should equal the Fungus Character name to reuse its color and portrait.
         public string name;
@@ -64,6 +64,8 @@ namespace KopliSoft.Investigation
         public List<NoteDefinition> notes = new List<NoteDefinition>();
         public List<ConclusionDefinition> conclusions = new List<ConclusionDefinition>();
         public List<TaskDefinition> tasks = new List<TaskDefinition>();
+        // Words that must never appear in player-facing text; the validator warns about them.
+        public List<string> forbiddenWords = new List<string>();
 
         private Dictionary<string, NoteDefinition> noteById;
         private Dictionary<string, ConclusionDefinition> conclusionById;

@@ -4,9 +4,9 @@ using UnityEngine;
 namespace KopliSoft.Vehicles
 {
     /// <summary>
-    /// State of the airship "Diana" during the chapter: landed, moored after the first night, the captain inside or out,
+    /// State of the airship during the chapter: landed, moored after the first night, the captain inside or out,
     /// talking to the captain unlocked. Switches the matching scene objects and keeps the state in the save game.
-    /// Replaces the Fungus flowchart /Vehicles/Diana airship/FlowChart.
+    /// Replaces the airship's Fungus state flowchart.
     /// Changed by ink (airship_event) and by the Fungus messages "NewDay" and "ProtagonistExitsAirship".
     /// </summary>
     public class AirshipState : MonoBehaviour, IDataPersistence
@@ -15,7 +15,7 @@ namespace KopliSoft.Vehicles
         [SerializeField] private GameObject moving;
         [SerializeField] private GameObject anchored;
 
-        [Header("The captain leaves the airship with Anna")]
+        [Header("The captain leaves the airship with the player")]
         [SerializeField] private GameObject captainInside;
         [SerializeField] private GameObject captainOutside;
 
@@ -99,14 +99,14 @@ namespace KopliSoft.Vehicles
             ApplyMoored();
         }
 
-        /// <summary>Anna leaves the airship; the captain comes with her.</summary>
+        /// <summary>The player leaves the airship; the captain comes along.</summary>
         public void CaptainDisembarks()
         {
             state.captainInside = false;
             ApplyCaptainOutside();
         }
 
-        /// <summary>After the first talk with the Flying Club master, Anna can sleep and talk to the captain.</summary>
+        /// <summary>A story event unlocks sleeping aboard and talking to the captain.</summary>
         public void UnlockTalkingToCaptain()
         {
             state.talkingToCaptainUnlocked = true;

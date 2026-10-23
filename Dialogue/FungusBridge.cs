@@ -7,7 +7,7 @@ namespace KopliSoft.Dialogue
 {
     /// <summary>
     /// Lets ink read and set boolean variables of Fungus flowcharts while content is split between both systems,
-    /// e.g. Yuri (ink) granting the permission that the "Flight log" flowchart (Fungus) checks.
+    /// e.g. an ink conversation setting a flag that a Fungus flowchart still checks.
     /// Declared as EXTERNAL in case_functions.ink.
     /// </summary>
     public static class FungusBridge
@@ -34,7 +34,7 @@ namespace KopliSoft.Dialogue
         }
 
         /// <summary>
-        /// Plays an Animator state from its start, like Fungus' PlayAnimState, e.g. ("/Vehicles/Diana airship", "Landing").
+        /// Plays an Animator state from its start, like Fungus' PlayAnimState, e.g. ("/Vehicles/Airship", "Landing").
         /// </summary>
         public static void PlayAnimation(string path, string state)
         {
